@@ -1,0 +1,13 @@
+version: '2'
+services:
+  vaccine-bot:
+    build: .
+    links:
+      - redis
+    environment:
+      REDIS_URL: redis://redis
+    stdin_open: true
+    tty: true
+
+  redis:
+    image: redis

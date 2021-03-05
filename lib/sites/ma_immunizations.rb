@@ -26,6 +26,8 @@ module MaImmunizations
 
         logger.info "[MaImmunizations] Checking page #{page_num}"
         page = Page.new(page_num, storage, logger, cookie_helper)
+        return clinics if page.waiting_page
+
         clinics += page.clinics
         return clinics if page.final_page?
       rescue => e
@@ -105,13 +107,19 @@ module MaImmunizations
   end
 
   class Page
+    CLINIC_PAGE_IDENTIFIER = /Find a Vaccination Clinic/.freeze
+
+    attr_reader :waiting_page
+
     def initialize(page, storage, logger, cookie_helper)
       response = RestClient.get(BASE_URL + "&page=#{page}", cookies: cookie_helper.cookies).body
-      if /Find a Vaccination Clinic/ !~ response
+      if CLINIC_PAGE_IDENTIFIER !~ response
         logger.info '[MaImmunizations] Got waiting page'
         cookie_helper.refresh_cookies
         response = RestClient.get(BASE_URL + "&page=#{page}", cookies: cookie_helper.cookies).body
       end
+
+      @waiting_page = CLINIC_PAGE_IDENTIFIER !~ response
 
       @doc = Nokogiri::HTML(response)
       @storage = storage

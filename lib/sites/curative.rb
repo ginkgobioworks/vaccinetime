@@ -5,21 +5,21 @@ require 'rest-client'
 module Curative
   BASE_URL = 'https://curative.com/sites/'.freeze
   API_URL = 'https://labtools.curativeinc.com/api/v1/testing_sites/'.freeze
-  SITES = [
-    24181, # DoubleTree Hotel - Danvers
-    24182, # Eastfield Mall - Springfield
-    25336, # Circuit City - Dartmouth
-  ].freeze
+  SITES = {
+    24181 => 'DoubleTree Hotel - Danvers',
+    24182 => 'Eastfield Mall - Springfield',
+    25336 => 'Circuit City - Dartmouth',
+  }.freeze
 
   def self.all_clinics(storage, logger)
-    SITES.flat_map do |site_num|
+    SITES.flat_map do |site_num, site_name|
       sleep(2)
       begin
-        logger.info "[Curative] Checking site #{site_num}"
+        logger.info "[Curative] Checking site #{site_num}: #{site_name}"
         Page.new(site_num, storage, logger).clinics
       rescue => e
         Sentry.capture_exception(e)
-        logger.error "[Curative] Failed to get appointments for site #{site_num}: #{e}"
+        logger.error "[Curative] Failed to get appointments for site #{site_num}/#{site_name}: #{e}"
         []
       end
     end

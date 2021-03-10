@@ -5,7 +5,6 @@ require 'time'
 class Storage
   APPOINTMENT_KEY = 'slack-vaccine-appt'.freeze
   POST_KEY        = 'slack-vaccine-post'.freeze
-  APPT_STREAM_KEY = 'vaccine-available-appointments'.freeze
   COOKIES_KEY     = 'vaccine-cookies'.freeze
 
   def initialize(redis = Redis.new)

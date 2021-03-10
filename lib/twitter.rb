@@ -13,6 +13,7 @@ end
 class TwitterClient
   TWEET_THRESHOLD = 10 # minimum number to post
   TWEET_INCREASE_NEEDED = 5
+  TWEET_COOLDOWN = 600 # 10 minutes
 
   def initialize(logger)
     @logger = logger
@@ -48,7 +49,7 @@ class TwitterClient
     clinic.link &&
       clinic.appointments > TWEET_THRESHOLD &&
       clinic.new_appointments > TWEET_INCREASE_NEEDED &&
-      clinic.has_not_posted_recently?
+      (Time.now - clinic.last_posted_time) > TWEET_COOLDOWN
   end
 
   def post(clinics)

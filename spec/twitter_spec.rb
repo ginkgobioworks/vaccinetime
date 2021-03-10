@@ -38,7 +38,7 @@ describe TwitterClient do
     end
 
     it 'returns false if the clinic has posted recently' do
-      mock_clinic = MockClinic.new(appointments: 100, new_appointments: 100, has_not_posted_recently: false)
+      mock_clinic = MockClinic.new(appointments: 100, new_appointments: 100, last_posted_time: (Time.now - 60).to_s)
       expect(twitter.should_post?(mock_clinic)).to be_falsy
     end
   end

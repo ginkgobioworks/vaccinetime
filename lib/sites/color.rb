@@ -2,6 +2,8 @@ require 'date'
 require 'json'
 require 'open-uri'
 
+require_relative '../sentry_helper'
+
 module Color
   BASE_URL = 'https://home.color.com/api/v1'.freeze
   TOKEN_URL = "#{BASE_URL}/get_onsite_claim".freeze
@@ -16,14 +18,9 @@ module Color
   def self.all_clinics(storage, logger)
     SITES.flat_map do |site_id, site_name|
       sleep(2)
-      begin
+      SentryHelper.catch_errors(logger, 'Color') do
         logger.info "[Color] Checking site #{site_name}"
-        clinics = Page.new(site_id, site_name, storage, logger).clinics
-        clinics
-      rescue => e
-        Sentry.capture_exception(e)
-        logger.error "[Color] Failed to get appointments for site #{site_name}: #{e}"
-        []
+        Page.new(site_id, site_name, storage, logger).clinics
       end
     end
   end

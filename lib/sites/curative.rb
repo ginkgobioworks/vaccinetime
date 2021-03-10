@@ -2,6 +2,8 @@ require 'date'
 require 'json'
 require 'rest-client'
 
+require_relative '../sentry_helper'
+
 module Curative
   BASE_URL = 'https://curative.com/sites/'.freeze
   API_URL = 'https://labtools.curativeinc.com/api/v1/testing_sites/'.freeze
@@ -14,13 +16,9 @@ module Curative
   def self.all_clinics(storage, logger)
     SITES.flat_map do |site_num, site_name|
       sleep(2)
-      begin
+      SentryHelper.catch_errors(logger, 'Curative') do
         logger.info "[Curative] Checking site #{site_num}: #{site_name}"
         Page.new(site_num, storage, logger).clinics
-      rescue => e
-        Sentry.capture_exception(e)
-        logger.error "[Curative] Failed to get appointments for site #{site_num}/#{site_name}: #{e}"
-        []
       end
     end
   end

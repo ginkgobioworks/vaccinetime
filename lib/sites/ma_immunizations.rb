@@ -4,6 +4,8 @@ require 'open-uri'
 require 'rest-client'
 require 'sentry-ruby'
 
+require_relative '../sentry_helper'
+
 module MaImmunizations
   BASE_URL = "https://www.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
 
@@ -21,7 +23,7 @@ module MaImmunizations
     page_num = 1
     clinics = []
     loop do
-      begin
+      SentryHelper.catch_errors(logger, 'MaImmunizations', on_error: clinics) do
         raise "Too many pages: #{page_num}" if page_num > 100
 
         logger.info "[MaImmunizations] Checking page #{page_num}"
@@ -31,10 +33,6 @@ module MaImmunizations
 
         clinics += page.clinics
         return clinics if page.final_page?
-      rescue => e
-        Sentry.capture_exception(e)
-        logger.error "[MaImmunizations] Failed to get appointments on page #{page_num}: #{e}"
-        return clinics
       end
 
       page_num += 1

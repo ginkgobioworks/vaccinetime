@@ -1,4 +1,5 @@
 require_relative '../lib/storage'
+require_relative '../lib/twitter'
 require_relative '../lib/sites/ma_immunizations'
 
 describe 'MaImmunizations' do

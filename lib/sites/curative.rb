@@ -3,6 +3,7 @@ require 'json'
 require 'rest-client'
 
 require_relative '../sentry_helper'
+require_relative './base_clinic'
 
 module Curative
   BASE_URL = 'https://curative.com/sites/'.freeze
@@ -37,12 +38,19 @@ module Curative
     end
 
     def clinics
-      return [] if appointments_are_hidden?
+      return [] unless appointments_are_visible?
 
       appointments_by_date.map do |k, v|
         @logger.info "[Curative] Site #{@site_num} on #{k}: found #{v} appoinments" if v.positive?
         Clinic.new(@site_num, @json, @storage, k, v)
       end
+    end
+
+    def appointments_are_visible?
+      return true unless ENV['ENVIRONMENT'] == 'production'
+
+      now = Time.now
+      Date.today.thursday? && now.hour > 8 && now.min > 30
     end
 
     def appointments_are_hidden?
@@ -94,13 +102,13 @@ module Curative
     end
   end
 
-  class Clinic
+  class Clinic < BaseClinic
     attr_reader :appointments, :date
 
     def initialize(site_num, json, storage, date, appointments)
+      super(storage)
       @site_num = site_num
       @json = json
-      @storage = storage
       @date = date
       @appointments = appointments
     end
@@ -123,41 +131,8 @@ module Curative
       @json['services'].join(', ')
     end
 
-    def storage_key
-      title
-    end
-
-    def save_appointments
-      @storage.save_appointments(self)
-    end
-
-    def save_tweet_time
-      @storage.save_post_time(self)
-    end
-
-    def last_appointments
-      @storage.get_appointments(self)&.to_i || 0
-    end
-
-    def new_appointments
-      appointments - last_appointments
-    end
-
-    def render_appointments
-      appointment_txt = "#{appointments} (#{new_appointments} new)"
-      if appointments >= 10
-        ":siren: #{appointment_txt} :siren:"
-      else
-        appointment_txt
-      end
-    end
-
     def link
       "https://curative.com/sites/#{@site_num}"
-    end
-
-    def has_not_posted_recently?
-      (Time.now - last_posted_time) > 600 # 10 minutes
     end
 
     def sign_up_page
@@ -172,14 +147,6 @@ module Curative
           text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Available appointments:* #{render_appointments}\n*Link:* #{link}",
         },
       }
-    end
-
-    def twitter_text
-      "#{appointments} appointments available at #{title}. Check eligibility and sign up at #{sign_up_page}"
-    end
-
-    def last_posted_time
-      DateTime.parse(@storage.get_post_time(self) || '2021-January-1').to_time
     end
   end
 end

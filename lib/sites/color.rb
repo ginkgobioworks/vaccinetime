@@ -3,6 +3,7 @@ require 'json'
 require 'open-uri'
 
 require_relative '../sentry_helper'
+require_relative './base_clinic'
 
 module Color
   BASE_URL = 'https://home.color.com/api/v1'.freeze
@@ -52,13 +53,13 @@ module Color
     end
   end
 
-  class Clinic
+  class Clinic < BaseClinic
     attr_reader :appointments, :date
 
     def initialize(site_id, site_info, storage, date, appointments)
+      super(storage)
       @site_id = site_id
       @site_info = site_info
-      @storage = storage
       @date = date
       @appointments = appointments
     end
@@ -77,41 +78,8 @@ module Color
       addr + ", #{@site_info['address']['city']} #{@site_info['address']['state']} #{@site_info['address']['postal_code']}"
     end
 
-    def storage_key
-      title
-    end
-
-    def save_appointments
-      @storage.save_appointments(self)
-    end
-
-    def save_tweet_time
-      @storage.save_post_time(self)
-    end
-
-    def last_appointments
-      @storage.get_appointments(self)&.to_i || 0
-    end
-
-    def new_appointments
-      appointments - last_appointments
-    end
-
-    def render_appointments
-      appointment_txt = "#{appointments} (#{new_appointments} new)"
-      if appointments >= 10
-        ":siren: #{appointment_txt} :siren:"
-      else
-        appointment_txt
-      end
-    end
-
     def link
       "https://home.color.com/vaccine/register/#{@site_id}"
-    end
-
-    def has_not_posted_recently?
-      (Time.now - last_posted_time) > 600 # 10 minutes
     end
 
     def slack_blocks
@@ -126,14 +94,6 @@ module Color
 
     def sign_up_page
       link
-    end
-
-    def twitter_text
-      "#{appointments} appointments available at #{title}. Check eligibility and sign up at #{sign_up_page}"
-    end
-
-    def last_posted_time
-      DateTime.parse(@storage.get_post_time(self) || '2021-January-1').to_time
     end
   end
 end

@@ -5,6 +5,7 @@ require 'rest-client'
 require 'sentry-ruby'
 
 require_relative '../sentry_helper'
+require_relative './base_clinic'
 
 module MaImmunizations
   BASE_URL = "https://www.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
@@ -134,14 +135,14 @@ module MaImmunizations
     end
   end
 
-  class Clinic
+  class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
 
     attr_accessor :appointments
 
     def initialize(group, storage)
+      super(storage)
       @group = group
-      @storage = storage
       @paragraphs = group.search('p')
       @appointments = parse_appointments
     end
@@ -192,10 +193,6 @@ module MaImmunizations
       'https://www.maimmunizations.org' + @paragraphs[8].search('a')[0]['href']
     end
 
-    def has_not_posted_recently?
-      (Time.now - last_posted_time) > 600 # 10 minutes
-    end
-
     def name
       match = TITLE_MATCHER.match(title)
       match && match[1]
@@ -204,19 +201,6 @@ module MaImmunizations
     def date
       match = TITLE_MATCHER.match(title)
       match && DateTime.parse(match[2])
-    end
-
-    def render_appointments
-      appointment_txt = "#{appointments} (#{new_appointments} new)"
-      if appointments >= 10
-        ":siren: #{appointment_txt} :siren:"
-      else
-        appointment_txt
-      end
-    end
-
-    def new_appointments
-      appointments - last_appointments
     end
 
     def slack_blocks
@@ -233,30 +217,6 @@ module MaImmunizations
       addr = 'https://www.maimmunizations.org/clinic/search?'
       addr += "q[venue_search_name_or_venue_name_i_cont]=#{name}&" if name
       URI.parse(addr)
-    end
-
-    def twitter_text
-      "#{appointments} appointments available at #{title}. Check eligibility and sign up at #{sign_up_page}"
-    end
-
-    def storage_key
-      title
-    end
-
-    def save_appointments
-      @storage.save_appointments(self)
-    end
-
-    def last_appointments
-      @storage.get_appointments(self)&.to_i || 0
-    end
-
-    def save_tweet_time
-      @storage.save_post_time(self)
-    end
-
-    def last_posted_time
-      DateTime.parse(@storage.get_post_time(self) || '2021-January-1').to_time
     end
   end
 end

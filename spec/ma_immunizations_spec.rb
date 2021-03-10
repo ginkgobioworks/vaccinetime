@@ -9,10 +9,10 @@ describe 'MaImmunizations' do
 
   describe '.all_clinics' do
     it 'returns all clinics' do
-      cookie_helper = double('MaImmunizations::WaitingPageHelper', cookies: nil)
+      expect(redis).to receive(:get).with('vaccine-cookies:ma-immunization').and_return({ cookies: 'foo', expiration: Time.now + (60 * 60 * 24) }.to_json)
       response = double('RestClient::Response', body: fixture)
       expect(RestClient).to receive(:get).and_return(response)
-      clinics = MaImmunizations.all_clinics(storage, logger, cookie_helper)
+      clinics = MaImmunizations.all_clinics(storage, logger)
       # NOTE(dan): there are 8 clinics in the example file but one is a
       # duplicate that we consolidate, so we only expect to have 7
       expect(clinics.length).to eq(7)
@@ -25,10 +25,10 @@ describe 'MaImmunizations' do
       mock_twitter = double('Twitter')
       expect(FakeTwitter).to receive(:new).and_return(mock_twitter)
       twitter = TwitterClient.new(logger)
-      cookie_helper = double('MaImmunizations::WaitingPageHelper', cookies: nil)
       response = double('RestClient::Response', body: fixture)
       expect(RestClient).to receive(:get).and_return(response)
-      clinics = MaImmunizations.all_clinics(storage, logger, cookie_helper)
+      expect(redis).to receive(:get).with('vaccine-cookies:ma-immunization').and_return({ cookies: 'foo', expiration: Time.now + (60 * 60 * 24) }.to_json)
+      clinics = MaImmunizations.all_clinics(storage, logger)
       expect(redis).to receive(:get).exactly(3).times.and_return(nil)
       expect(redis).to receive(:set).once
       expect(mock_twitter).to receive(:update).with('100 appointments available at Reggie Lewis State Track Athletic Ctr, Tremont Street, Boston, MA, USA on 03/01/2021. Check eligibility and sign up at https://www.maimmunizations.org/clinic/search?q[venue_search_name_or_venue_name_i_cont]=Reggie%20Lewis%20State%20Track%20Athletic%20Ctr,%20Tremont%20Street,%20Boston,%20MA,%20USA&')

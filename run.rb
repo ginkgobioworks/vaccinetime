@@ -12,10 +12,10 @@ require_relative 'lib/sites/color'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY'] || 60 # seconds
 
-def all_clinics(storage, logger, ma_immunizations_cookie_helper)
+def all_clinics(storage, logger)
   Curative.all_clinics(storage, logger) +
-  Color.all_clinics(storage, logger) +
-    MaImmunizations.all_clinics(storage, logger, ma_immunizations_cookie_helper)
+    Color.all_clinics(storage, logger) +
+    MaImmunizations.all_clinics(storage, logger)
 end
 
 def main
@@ -36,20 +36,18 @@ def main
   slack = SlackClient.new(logger)
   twitter = TwitterClient.new(logger)
 
-  ma_immunizations_cookie_helper = MaImmunizations::WaitingPageHelper.new(logger, storage)
+  logger.info "[Main] Update frequency is set to every #{UPDATE_FREQUENCY} seconds"
 
   if ENV['SEED_REDIS']
     logger.info '[Main] Seeding redis with current appointments'
-    all_clinics(storage, logger, ma_immunizations_cookie_helper).each(&:save_appointments)
+    all_clinics(storage, logger).each(&:save_appointments)
     logger.info '[Main] Done seeding redis'
+    sleep(UPDATE_FREQUENCY)
   end
 
-  logger.info "[Main] Update frequency is set to every #{UPDATE_FREQUENCY} seconds"
   loop do
-    sleep(UPDATE_FREQUENCY)
-
     logger.info '[Main] Started checking'
-    clinics = all_clinics(storage, logger, ma_immunizations_cookie_helper)
+    clinics = all_clinics(storage, logger)
 
     slack.post(clinics)
     twitter.post(clinics)
@@ -57,6 +55,7 @@ def main
     clinics.each(&:save_appointments)
 
     logger.info '[Main] Done checking'
+    sleep(UPDATE_FREQUENCY)
   end
 
 rescue => e

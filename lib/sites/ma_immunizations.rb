@@ -7,8 +7,8 @@ require 'sentry-ruby'
 module MaImmunizations
   BASE_URL = "https://www.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
 
-  def self.all_clinics(storage, logger, cookie_helper)
-    unconsolidated_clinics(storage, logger, cookie_helper).each_with_object({}) do |clinic, h|
+  def self.all_clinics(storage, logger)
+    unconsolidated_clinics(storage, logger).each_with_object({}) do |clinic, h|
       if h[clinic.title]
         h[clinic.title].appointments += clinic.appointments
       else
@@ -17,7 +17,7 @@ module MaImmunizations
     end.values
   end
 
-  def self.unconsolidated_clinics(storage, logger, cookie_helper)
+  def self.unconsolidated_clinics(storage, logger)
     page_num = 1
     clinics = []
     loop do
@@ -25,7 +25,8 @@ module MaImmunizations
         raise "Too many pages: #{page_num}" if page_num > 100
 
         logger.info "[MaImmunizations] Checking page #{page_num}"
-        page = Page.new(page_num, storage, logger, cookie_helper)
+        page = Page.new(page_num, storage, logger)
+        page.fetch
         return clinics if page.waiting_page
 
         clinics += page.clinics
@@ -41,89 +42,65 @@ module MaImmunizations
     end
   end
 
-  class WaitingPageHelper
-    COOKIE_SITE = 'ma-immunization'.freeze
-
-    def initialize(logger, storage)
-      @logger = logger
-      @storage = storage
-      init_cookies
-    end
-
-    def init_cookies
-      existing_cookies = @storage.get_cookies(COOKIE_SITE)
-      if existing_cookies
-        @logger.info '[MaImmunizations] Got existing cookies from storage'
-        @cookies = existing_cookies['cookies']
-        @cookie_expiration = Time.parse(existing_cookies['expiration'])
-      end
-      refresh_cookies
-    end
-
-    def refresh_cookies(force: false)
-      if !force && @cookies && @cookie_expiration && @cookie_expiration > (Time.now + 60 * 60)
-        @logger.info '[MaImmunizations] Skipping setting cookies'
-      else
-        @logger.info '[MaImmunizations] Setting cookies'
-        response = RestClient.get(BASE_URL)
-        @cookies = response.cookies
-        @cookie_expiration = response.cookie_jar.map(&:expires_at).min
-        @storage.save_cookies(COOKIE_SITE, @cookies, @cookie_expiration)
-      end
-
-      @logger.info '[MaImmunizations] Starting waiting page'
-      iter = 0
-      loop do
-        sleep(5)
-        response = RestClient.get(BASE_URL, cookies: @cookies).body
-        break if /Find a Vaccination Clinic/ =~ response
-
-        if iter == 12 # wait a minute before checking other sites
-          minutes_left = /estimated wait time is\s*([\d\w\s]+)\./.match(response.gsub('\n', ''))
-          if minutes_left
-            @logger.info "[MaImmunizations] Waited too long, estimate left: #{minutes_left[1]}"
-          else
-            @logger.info '[MaImmunizations] Waited too long, no estimate found'
-          end
-          return
-        end
-
-        iter += 1
-      end
-      @logger.info '[MaImmunizations] Made it through waiting page'
-    end
-
-    def cookies
-      refresh_cookies unless @cookies && @cookie_expiration
-
-      # Try to refresh cookies around midnight if they're going to expire today
-      now = Time.now
-      refresh_cookies(force: true) if @cookie_expiration.year == now.year &&
-                                      @cookie_expiration.month == now.month &&
-                                      @cookie_expiration.day == now.day
-
-      @cookies
-    end
-  end
-
   class Page
     CLINIC_PAGE_IDENTIFIER = /Find a Vaccination Clinic/.freeze
+    COOKIE_SITE = 'ma-immunization'.freeze
 
     attr_reader :waiting_page
 
-    def initialize(page, storage, logger, cookie_helper)
-      response = RestClient.get(BASE_URL + "&page=#{page}", cookies: cookie_helper.cookies).body
-      if CLINIC_PAGE_IDENTIFIER !~ response
-        logger.info '[MaImmunizations] Got waiting page'
-        cookie_helper.refresh_cookies
-        response = RestClient.get(BASE_URL + "&page=#{page}", cookies: cookie_helper.cookies).body
-      end
-
-      @waiting_page = CLINIC_PAGE_IDENTIFIER !~ response
-
-      @doc = Nokogiri::HTML(response)
+    def initialize(page, storage, logger)
+      @page = page
       @storage = storage
       @logger = logger
+      @waiting_page = true
+    end
+
+    def fetch
+      cookies = get_cookies
+      response = RestClient.get(BASE_URL + "&page=#{@page}", cookies: cookies).body
+      if CLINIC_PAGE_IDENTIFIER !~ response
+        @logger.info '[MaImmunizations] Got waiting page'
+        12.times do
+          response = RestClient.get(BASE_URL + "&page=#{@page}", cookies: cookies).body
+          break if CLINIC_PAGE_IDENTIFIER =~ response
+
+          sleep(5)
+        end
+      end
+
+      if CLINIC_PAGE_IDENTIFIER =~ response
+        @logger.info '[MaImmunizations] Made it through waiting page'
+        @waiting_page = false
+      else
+        minutes_left = /estimated wait time is\s*([\d\w\s]+)\./.match(response.gsub('\n', ''))
+        if minutes_left
+          @logger.info "[MaImmunizations] Waited too long, estimate left: #{minutes_left[1]}"
+        else
+          @logger.info '[MaImmunizations] Waited too long, no estimate found'
+        end
+      end
+
+      @doc = Nokogiri::HTML(response)
+    end
+
+    def get_cookies
+      existing_cookies = @storage.get_cookies(COOKIE_SITE) || {}
+      cookies = existing_cookies['cookies']
+      if cookies
+        cookie_expiration = Time.parse(existing_cookies['expiration'])
+        # use existing cookies unless they're expired
+        if cookie_expiration > Time.now
+          @logger.info '[MaImmunizations] Using existing cookies'
+          return cookies
+        end
+      end
+
+      @logger.info '[MaImmunizations] Getting new cookies'
+      response = RestClient.get(BASE_URL, cookies: cookies)
+      new_cookies = response.cookies
+      cookie_expiration = response.cookie_jar.map(&:expires_at).compact.min
+      @storage.save_cookies(COOKIE_SITE, new_cookies, cookie_expiration)
+      new_cookies
     end
 
     def final_page?

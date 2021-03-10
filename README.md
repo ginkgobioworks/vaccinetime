@@ -63,6 +63,8 @@ Additional configuration can be done with the following:
 * SENTRY_DSN - sets up error handling with [Sentry](https://sentry.io)
 * ENVIRONMENT - configures Sentry environment
 * UPDATE_FREQUENCY - number of seconds to wait between updates (default 60)
+* SEED_REDIS - set to true to seed redis with the first batch of found
+  appointments (useful for deploying to fresh redis instances)
 
 ## Contributing
 

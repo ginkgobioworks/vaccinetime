@@ -38,9 +38,11 @@ def main
 
   ma_immunizations_cookie_helper = MaImmunizations::WaitingPageHelper.new(logger, storage)
 
-  logger.info '[Main] Seeding redis with current appointments'
-  all_clinics(storage, logger, ma_immunizations_cookie_helper).each(&:save_appointments)
-  logger.info '[Main] Done seeding redis'
+  if ENV['SEED_REDIS']
+    logger.info '[Main] Seeding redis with current appointments'
+    all_clinics(storage, logger, ma_immunizations_cookie_helper).each(&:save_appointments)
+    logger.info '[Main] Done seeding redis'
+  end
 
   logger.info "[Main] Update frequency is set to every #{UPDATE_FREQUENCY} seconds"
   loop do

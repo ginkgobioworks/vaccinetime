@@ -25,10 +25,11 @@ command to pause one minute between site scraping so that we don't DOS the
 sites or get rate limited.
 
 Before the main loop, the bot runs an initialization phase where it creates
-clients to interact with Redis, Slack, and Twitter. At this stage it also runs
-through all the site scrapers once and then stores those results in Redis for
-future comparison. By seeding the data once in this way we can deploy to new
-environments with an empty Redis without sending erroneous tweets accidentally.
+clients to interact with Redis, Slack, and Twitter. At this stage if the
+`SEED_REDIS` environment variable is set it will run through all the site
+scrapers once and then stores those results in Redis for future comparison. By
+seeding the data once in this way we can deploy to new environments with an
+empty Redis without sending erroneous tweets accidentally.
 
 Site scrapers are split into separate modules under [lib/sites/](lib/sites/).
 Each implements custom logic to fetch vaccine appointments for the given

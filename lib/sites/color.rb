@@ -6,15 +6,19 @@ module Color
   BASE_URL = 'https://home.color.com/api/v1'.freeze
   TOKEN_URL = "#{BASE_URL}/get_onsite_claim".freeze
   APPOINTMENT_URL = "#{BASE_URL}/vaccination_appointments/availability".freeze
-  SITES = ['natickmall'].freeze
+  SITES = {
+    'natickmall' => 'Natick Mall',
+    'reggielewis' => 'Reggie Lewis Center',
+    'gillettestadium' => 'Gillette Stadium',
+    'fenway-hynes' => 'Fenway Park/Hynes Convention Center',
+  }.freeze
 
   def self.all_clinics(storage, logger)
-    SITES.flat_map do |site_name|
+    SITES.flat_map do |site_id, site_name|
       sleep(2)
       begin
         logger.info "[Color] Checking site #{site_name}"
-        clinics = Page.new(site_name, storage, logger).clinics
-        logger.info '[Color] No appointments found' if clinics.empty?
+        clinics = Page.new(site_id, site_name, storage, logger).clinics
         clinics
       rescue => e
         Sentry.capture_exception(e)
@@ -25,9 +29,10 @@ module Color
   end
 
   class Page
-    def initialize(site_name, storage, logger)
-      @short_name = site_name
-      token_response = JSON.parse(URI.parse("#{TOKEN_URL}?partner=#{site_name}").open.read)
+    def initialize(site_id, site_name, storage, logger)
+      @site_id = site_id
+      @site_name = site_name
+      token_response = JSON.parse(URI.parse("#{TOKEN_URL}?partner=#{site_id}").open.read)
       token = token_response['token']
       @site_info = token_response['population_settings']['collection_sites'][0]
       @json = JSON.parse(URI.parse("#{APPOINTMENT_URL}?claim_token=#{token}&collection_site=#{@site_info['name']}").open.read)
@@ -36,7 +41,6 @@ module Color
     end
 
     def appointments_by_date
-      @logger.info(@json['results']) if @json['results'].any?
       @json['results'].each_with_object(Hash.new(0)) do |window, h|
         date = DateTime.parse(window['start'])
         h["#{date.month}/#{date.day}/#{date.year}"] += window['remaining_spaces']
@@ -45,8 +49,8 @@ module Color
 
     def clinics
       appointments_by_date.map do |date, appointments|
-        @logger.info "[Color] Site #{@short_name} on #{date}: found #{appointments} appointments" if appointments.positive?
-        Clinic.new(@short_name, @site_info, @storage, date, appointments)
+        @logger.info "[Color] Site #{@site_name} on #{date}: found #{appointments} appointments" if appointments.positive?
+        Clinic.new(@site_id, @site_info, @storage, date, appointments)
       end
     end
   end
@@ -54,8 +58,8 @@ module Color
   class Clinic
     attr_reader :appointments, :date
 
-    def initialize(short_name, site_info, storage, date, appointments)
-      @short_name = short_name
+    def initialize(site_id, site_info, storage, date, appointments)
+      @site_id = site_id
       @site_info = site_info
       @storage = storage
       @date = date
@@ -106,7 +110,7 @@ module Color
     end
 
     def link
-      "https://home.color.com/vaccine/register/#{@short_name}"
+      "https://home.color.com/vaccine/register/#{@site_id}"
     end
 
     def has_not_posted_recently?

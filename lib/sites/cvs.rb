@@ -26,7 +26,9 @@ module Cvs
   end
 
   File.open("cvs_locations.csv", "r") do |f|
-    f.each_line do |line|
+    lines = f.lines
+    lines.next # skip header
+    lines.each do |line|
       entry = line.strip.split(',')
       city = entry[0]
       stores = entry[1].to_i
@@ -41,26 +43,29 @@ module Cvs
                                    .sort_by { |cvs_city| -1 * CVS_CITIES[cvs_city].stores }
 
   def self.state_clinic_representation(storage, logger)
-    # For now, CVS is counted as one "clinic" for the whole state and every city offering
-    # with stores offering the vaccine is counted as one "appointment".
-    cvs_client = CvsClient.new(STATE, USER_AGENTS)
-    cvs_client.init_session(logger)
+    clinics = []
+    SentryHelper.catch_errors(logger, 'MaImmunizations', on_error: clinics) do
+      # For now, CVS is counted as one "clinic" for the whole state and every city offering
+      # with stores offering the vaccine is counted as one "appointment".
+      cvs_client = CvsClient.new(STATE, USER_AGENTS)
+      cvs_client.init_session(logger)
 
-    cities_with_appointments = cvs_client.cities_with_appointments(logger)
-    if cities_with_appointments.any?
-      logger.info "[CVS] There are #{cities_with_appointments.length} cities with appointments"
-      logger.info "[CVS] Cities with appointments: #{cities_with_appointments.join(", ")}"
-    else
-      logger.info "[CVS] No availability for any city in #{STATE}"
+      cities_with_appointments = cvs_client.cities_with_appointments(logger)
+      if cities_with_appointments.any?
+        logger.info "[CVS] There are #{cities_with_appointments.length} cities with appointments"
+        logger.info "[CVS] Cities with appointments: #{cities_with_appointments.join(", ")}"
+      else
+        logger.info "[CVS] No availability for any city in #{STATE}"
+      end
+
+      clinics = [StateClinic.new(storage, cities_with_appointments, STATE)]
     end
 
-    clinic = StateClinic.new(storage, cities_with_appointments, STATE)
-
-    return [clinic]
+    return clinics
   end
 
   class StateClinic < BaseClinic
-    LAST_SEEN_CITIES_KEY = "last-cities".freeze
+    LAST_SEEN_CITIES_KEY = "cvs-last-cities".freeze
 
     attr_accessor :appointments
 
@@ -96,19 +101,25 @@ module Cvs
     end
 
     def twitter_text
-      cities_text = ''
-      tweet_allowed_new_cities.each do |city|
-        if cities_text.length > 125
+      new_cities = tweet_allowed_new_cities
+      cities_text = new_cities.shift
+      while (city = new_cities.shift) do
+        pending_text = ", #{city}"
+        if cities_text.length + pending_text.length > 176
+          cities_text += ", and #{new_cities.length + 1} others"
           break
-        end
-        if cities_text.empty?
-          cities_text = city
         else
-          cities_text = cities_text + ", " + city
+          cities_text += pending_text
         end
       end
 
-      # 30 chars + up to 125 chars + 85 chars = 240 chars, limit is 280
+      #  30 chars: "CVS appointments available in "
+      # 176 chars: max of cities_text
+      #  16 chars: ", and NNN others"
+      #  35 chars: ". Check eligibility and sign up at "
+      #  23 chars: shortened link
+      # ---------
+      # 280 chars total, 280 is the maximum
       "CVS appointments available in #{cities_text}. Check eligibility and sign up at #{sign_up_page}"
     end
 
@@ -132,16 +143,11 @@ module Cvs
     end
 
     def new_cities
-      last_seen_cities = last_cities
-      @cities.reject { |new_city| last_seen_cities.include? new_city }
+      @cities - last_cities
     end
 
     def tweet_allowed_new_cities
       new_cities.filter { |new_city| TWEET_ALLOWED_CITIES.include? new_city }
-    end
-
-    def has_not_posted_recently?
-      (Time.now - last_posted_time) > 600 # 10 minutes
     end
 
     def should_tweet?

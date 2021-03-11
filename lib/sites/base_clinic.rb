@@ -1,6 +1,10 @@
 require 'date'
 
 class BaseClinic
+  TWEET_THRESHOLD = 10 # minimum number to post
+  TWEET_INCREASE_NEEDED = 5
+  TWEET_COOLDOWN = 600 # 10 minutes
+
   def initialize(storage)
     @storage = storage
   end
@@ -46,6 +50,18 @@ class BaseClinic
         text: "*#{title}*\n*Available appointments:* #{render_appointments}\n*Link:* #{link}",
       },
     }
+  end
+
+  def has_not_posted_recently?
+    (Time.now - last_posted_time) > TWEET_COOLDOWN # 10 minutes
+  end
+
+
+  def should_tweet?
+    link &&
+      appointments > TWEET_THRESHOLD &&
+      new_appointments > TWEET_INCREASE_NEEDED &&
+      has_not_posted_recently?
   end
 
   def twitter_text

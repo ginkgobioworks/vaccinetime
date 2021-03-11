@@ -97,7 +97,7 @@ module Cvs
 
     def twitter_text
       cities_text = ''
-      @cities.each do |city|
+      tweet_allowed_new_cities.each do |city|
         if cities_text.length > 125
           break
         end
@@ -134,7 +134,10 @@ module Cvs
     def new_cities
       last_seen_cities = last_cities
       @cities.reject { |new_city| last_seen_cities.include? new_city }
-             .filter { |new_city| TWEET_ALLOWED_CITIES.include? new_city }
+    end
+
+    def tweet_allowed_new_cities
+      new_cities.filter { |new_city| TWEET_ALLOWED_CITIES.include? new_city }
     end
 
     def has_not_posted_recently?
@@ -142,7 +145,7 @@ module Cvs
     end
 
     def should_tweet?
-      new_cities.length > 5 && has_not_posted_recently?
+      tweet_allowed_new_cities.length > 5 && has_not_posted_recently?
     end
   end
 

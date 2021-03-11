@@ -44,7 +44,7 @@ module Cvs
 
   def self.state_clinic_representation(storage, logger)
     clinics = []
-    SentryHelper.catch_errors(logger, 'MaImmunizations', on_error: clinics) do
+    SentryHelper.catch_errors(logger, 'Cvs', on_error: clinics) do
       # For now, CVS is counted as one "clinic" for the whole state and every city offering
       # with stores offering the vaccine is counted as one "appointment".
       cvs_client = CvsClient.new(STATE, USER_AGENTS)

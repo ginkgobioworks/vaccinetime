@@ -46,7 +46,8 @@ class TwitterClient
   end
 
   def should_post?(clinic)
-    clinic.link &&
+    clinic.respond_to?(:should_tweet?) && clinic.should_tweet? ||
+      clinic.link &&
       clinic.appointments > TWEET_THRESHOLD &&
       clinic.new_appointments > TWEET_INCREASE_NEEDED &&
       (Time.now - clinic.last_posted_time) > TWEET_COOLDOWN

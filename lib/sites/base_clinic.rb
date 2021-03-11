@@ -33,7 +33,7 @@ class BaseClinic
     raise NotImplementedError
   end
 
-  def render_appointments
+  def render_slack_appointments
     appointment_txt = "#{appointments} (#{new_appointments} new)"
     if appointments >= 10
       ":siren: #{appointment_txt} :siren:"
@@ -47,7 +47,7 @@ class BaseClinic
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: "*#{title}*\n*Available appointments:* #{render_appointments}\n*Link:* #{link}",
+        text: "*#{title}*\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
       },
     }
   end

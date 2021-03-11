@@ -208,7 +208,7 @@ module MaImmunizations
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
+          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
         },
       }
     end

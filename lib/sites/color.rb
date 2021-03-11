@@ -87,7 +87,7 @@ module Color
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_appointments}\n*Link:* #{link}",
+          text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
         },
       }
     end

@@ -144,7 +144,7 @@ module Curative
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Available appointments:* #{render_appointments}\n*Link:* #{link}",
+          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
         },
       }
     end

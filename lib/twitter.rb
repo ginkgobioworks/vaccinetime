@@ -11,9 +11,6 @@ class FakeTwitter
 end
 
 class TwitterClient
-  TWEET_THRESHOLD = 10 # minimum number to post
-  TWEET_INCREASE_NEEDED = 5
-  TWEET_COOLDOWN = 600 # 10 minutes
 
   def initialize(logger)
     @logger = logger
@@ -45,15 +42,8 @@ class TwitterClient
     Sentry.capture_exception(e)
   end
 
-  def should_post?(clinic)
-    clinic.link &&
-      clinic.appointments > TWEET_THRESHOLD &&
-      clinic.new_appointments > TWEET_INCREASE_NEEDED &&
-      (Time.now - clinic.last_posted_time) > TWEET_COOLDOWN
-  end
-
   def post(clinics)
-    clinics.filter { |clinic| should_post?(clinic) }.each do |clinic|
+    clinics.filter(&:should_tweet?).each do |clinic|
       tweet(clinic)
       clinic.save_tweet_time
     end

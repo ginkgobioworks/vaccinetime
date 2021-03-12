@@ -16,30 +16,30 @@ describe TwitterClient do
     end
   end
 
-  describe '#should_post?' do
+  describe '#should_tweet?' do
     it 'returns true if the clinic has more than 10 new appointments' do
       mock_clinic = MockClinic.new(appointments: 100, new_appointments: 100)
-      expect(twitter.should_post?(mock_clinic)).to be_truthy
+      expect(mock_clinic.should_tweet?).to be_truthy
     end
 
     it 'returns false if the clinic has no link' do
       mock_clinic = MockClinic.new(appointments: 100, new_appointments: 100, link: nil)
-      expect(twitter.should_post?(mock_clinic)).to be_falsy
+      expect(mock_clinic.should_tweet?).to be_falsy
     end
 
     it 'returns false if the clinic has fewer than 10 appointments' do
       mock_clinic = MockClinic.new(appointments: 9, new_appointments: 100)
-      expect(twitter.should_post?(mock_clinic)).to be_falsy
+      expect(mock_clinic.should_tweet?).to be_falsy
     end
 
     it 'returns false if the clinic has fewer than 5 new appointments' do
       mock_clinic = MockClinic.new(appointments: 100, new_appointments: 4)
-      expect(twitter.should_post?(mock_clinic)).to be_falsy
+      expect(mock_clinic.should_tweet?).to be_falsy
     end
 
     it 'returns false if the clinic has posted recently' do
       mock_clinic = MockClinic.new(appointments: 100, new_appointments: 100, last_posted_time: (Time.now - 60).to_s)
-      expect(twitter.should_post?(mock_clinic)).to be_falsy
+      expect(mock_clinic.should_tweet?).to be_falsy
     end
   end
 

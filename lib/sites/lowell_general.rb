@@ -121,7 +121,8 @@ module LowellGeneral
 
     def initialize(storage, stations, appointments, date)
       super(storage)
-      @stations = stations @appointments = appointments
+      @stations = stations
+      @appointments = appointments
       @date = DateTime.parse(date).strftime('%m/%d/%Y')
     end
 

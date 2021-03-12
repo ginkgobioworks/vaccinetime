@@ -1,6 +1,7 @@
 require 'date'
 require 'json'
 require 'rest-client'
+require 'csv'
 
 require_relative './base_clinic'
 
@@ -19,22 +20,14 @@ module Cvs
     end
   end
 
-  File.open("user_agents.txt", "r") do |f|
+  File.open("#{__dir__}/../../user_agents.txt", 'r') do |f|
     f.each_line do |line|
       USER_AGENTS.append(line.strip)
     end
   end
 
-  File.open("cvs_locations.csv", "r") do |f|
-    lines = f.lines
-    lines.next # skip header
-    lines.each do |line|
-      entry = line.strip.split(',')
-      city = entry[0]
-      stores = entry[1].to_i
-      should_tweet = entry[2] == "1"
-      CVS_CITIES[city] = CvsCity.new(city, stores, should_tweet)
-    end
+  CSV.read("#{__dir__}/../../cvs_locations.csv", headers: true).each do |row|
+    CVS_CITIES[row['city']] = CvsCity.new(row['city'], row['stores'].to_i, row['tweet'] == '1')
   end
 
   # This array also defines the order in which city names appear, the order is determined
@@ -44,7 +37,7 @@ module Cvs
 
   def self.state_clinic_representation(storage, logger)
     clinics = []
-    SentryHelper.catch_errors(logger, 'Cvs', on_error: clinics) do
+    SentryHelper.catch_errors(logger, 'CVS', on_error: clinics) do
       # For now, CVS is counted as one "clinic" for the whole state and every city offering
       # with stores offering the vaccine is counted as one "appointment".
       cvs_client = CvsClient.new(STATE, USER_AGENTS)

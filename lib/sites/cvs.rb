@@ -35,7 +35,7 @@ module Cvs
   TWEET_ALLOWED_CITIES = CVS_CITIES.keys.filter { |cvs_city| CVS_CITIES[cvs_city].should_tweet }
                                    .sort_by { |cvs_city| -1 * CVS_CITIES[cvs_city].stores }
 
-  def self.state_clinic_representation(storage, logger)
+  def self.all_clinics(storage, logger)
     clinics = []
     SentryHelper.catch_errors(logger, 'CVS', on_error: clinics) do
       # For now, CVS is counted as one "clinic" for the whole state and every city offering

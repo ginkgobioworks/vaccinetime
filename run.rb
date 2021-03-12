@@ -1,3 +1,4 @@
+require 'optparse'
 require 'sentry-ruby'
 
 require_relative 'lib/multi_logger'
@@ -15,16 +16,29 @@ require_relative 'lib/sites/my_chart'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY'] || 60 # seconds
 
-def all_clinics(storage, logger)
-  Curative.all_clinics(storage, logger) +
-    Color.all_clinics(storage, logger) +
-    Cvs.state_clinic_representation(storage, logger) +
-    LowellGeneral.all_clinics(storage, logger) +
-    MyChart.all_clinics(storage, logger) +
-    MaImmunizations.all_clinics(storage, logger)
+SCRAPERS = {
+  'curative' => Curative,
+  'color' => Color,
+  'cvs' => Cvs,
+  'lowell_general' => LowellGeneral,
+  'my_chart' => MyChart,
+  'ma_immunizations' => MaImmunizations,
+}.freeze
+
+def all_clinics(scraper, storage, logger)
+  if scraper == 'all'
+    SCRAPERS.values.flat_map do |scraper_module|
+      scraper_module.all_clinics(storage, logger)
+    end
+  else
+    scraper_module = SCRAPERS[scraper]
+    raise "Module #{scraper} not found" unless scraper_module
+
+    scraper_module.all_clinics(storage, logger)
+  end
 end
 
-def main
+def main(scraper: 'all')
   environment = ENV['ENVIRONMENT'] || 'dev'
 
   if ENV['SENTRY_DSN']
@@ -46,14 +60,14 @@ def main
 
   if ENV['SEED_REDIS']
     logger.info '[Main] Seeding redis with current appointments'
-    all_clinics(storage, logger).each(&:save_appointments)
+    all_clinics(scraper, storage, logger).each(&:save_appointments)
     logger.info '[Main] Done seeding redis'
     sleep(UPDATE_FREQUENCY)
   end
 
   loop do
     logger.info '[Main] Started checking'
-    clinics = all_clinics(storage, logger)
+    clinics = all_clinics(scraper, storage, logger)
 
     slack.post(clinics)
     twitter.post(clinics)
@@ -70,4 +84,13 @@ rescue => e
   raise
 end
 
-main
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: bundle exec ruby run.rb [options]"
+
+  opts.on('-s', '--scraper SCRAPER', 'Scraper to run') do |s|
+    options[:scraper] = s
+  end
+end.parse!
+
+main(**options)

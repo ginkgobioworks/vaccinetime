@@ -181,7 +181,7 @@ module Cvs
         :cookies => @cookies
       }
       begin
-        response = JSON.parse(RestClient.get(@state_status_url, headers))
+        response = JSON.parse(RestClient.get("#{@state_status_url}&nonce=#{Time.now.to_i}", headers))
       rescue RestClient::Exception => e
         logger.error "[CVS] Failed to get state status for #{@state}: #{e}"
         return []

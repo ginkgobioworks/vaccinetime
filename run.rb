@@ -88,7 +88,7 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: bundle exec ruby run.rb [options]"
 
-  opts.on('-s', '--scraper SCRAPER', 'Scraper to run') do |s|
+  opts.on('-s', '--scraper SCRAPER', SCRAPERS.keys, "Scraper to run, choose from: #{SCRAPERS.keys.join(', ')}") do |s|
     options[:scraper] = s
   end
 end.parse!

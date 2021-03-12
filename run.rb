@@ -10,6 +10,8 @@ require_relative 'lib/sites/ma_immunizations'
 require_relative 'lib/sites/curative'
 require_relative 'lib/sites/color'
 require_relative 'lib/sites/cvs'
+require_relative 'lib/sites/lowell_general'
+require_relative 'lib/sites/my_chart'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY'] || 60 # seconds
 
@@ -17,7 +19,9 @@ def all_clinics(storage, logger)
   Curative.all_clinics(storage, logger) +
     Color.all_clinics(storage, logger) +
     MaImmunizations.all_clinics(storage, logger) +
-    Cvs.state_clinic_representation(storage, logger)
+    Cvs.state_clinic_representation(storage, logger) +
+    LowellGeneral.all_clinics(storage, logger) +
+    MyChart.all_clinics(storage, logger)
 end
 
 def main

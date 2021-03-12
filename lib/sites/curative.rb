@@ -50,42 +50,11 @@ module Curative
       return true unless ENV['ENVIRONMENT'] == 'production'
 
       now = Time.now
-      Date.today.thursday? && now.hour > 8 && now.min > 30
-    end
-
-    def appointments_are_hidden?
-      if !Date.today.thursday? && ENV['ENVIRONMENT'] == 'production'
-        @logger.info "[Curative] Site #{@site_num} appointments are hidden on days besides Thursday in prod"
-        return true
-      end
+      return false unless Date.today.thursday? && now.hour >= 8 && now.min >= 30
 
       base_site = RestClient.get(BASE_URL + @site_num.to_s)
-      sign_up_key = "#{SIGN_UP_SEEN_KEY}:#{@site_num}"
+      return false if base_site.request.url.start_with?("#{QUEUE_SITE}/afterevent")
 
-      if base_site.code != 200
-        @logger.info "[Curative] Site #{@site_num} not available, returned code #{base_site.code}"
-        return true
-      end
-
-      if base_site.request.url.start_with?("#{QUEUE_SITE}/afterevent")
-        @logger.info "[Curative] Site #{@site_num} event has ended"
-        return true
-      end
-
-      if base_site.request.url.start_with?(QUEUE_SITE) &&
-          /MA COVID-19 vaccination appointment sign-ups have not yet begun/ =~ base_site.body
-        @logger.info "[Curative] Site #{@site_num} is waiting for the sign up event"
-        @storage.set(sign_up_key, Time.now)
-        return true
-      end
-
-      sign_up_last_seen = @storage.get(sign_up_key)
-      if sign_up_last_seen && Date.parse(sign_up_last_seen) == Date.today
-        @logger.info "[Curative] Site #{@site_num} is open after the sign up message today"
-        return false
-      end
-
-      @logger.info "[Curative] Site #{@site_num} is hidden because there was no queue seen today"
       true
     end
 

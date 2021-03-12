@@ -20,13 +20,13 @@ module Cvs
     end
   end
 
-  File.open("#{__dir__}/../../user_agents.txt", 'r') do |f|
+  File.open("#{__dir__}/config/user_agents.txt", 'r') do |f|
     f.each_line do |line|
       USER_AGENTS.append(line.strip)
     end
   end
 
-  CSV.read("#{__dir__}/../../cvs_locations.csv", headers: true).each do |row|
+  CSV.read("#{__dir__}/config/cvs_locations.csv", headers: true).each do |row|
     CVS_CITIES[row['city']] = CvsCity.new(row['city'], row['stores'].to_i, row['tweet'] == '1')
   end
 

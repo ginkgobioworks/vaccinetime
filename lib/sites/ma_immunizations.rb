@@ -144,11 +144,17 @@ module MaImmunizations
       super(storage)
       @group = group
       @paragraphs = group.search('p')
-      @appointments = parse_appointments
+      @parsed_info = @paragraphs[2..].each_with_object({}) do |p, h|
+        match = /^([\w\d\s]+):\s+(.+)$/.match(p.content)
+        next unless match
+
+        h[match[1].strip] = match[2].strip
+      end
+      @appointments = @parsed_info['Available Appointments'].to_i
     end
 
     def valid?
-      @paragraphs.any? && !@paragraphs[7].nil?
+      @parsed_info.key?('Available Appointments')
     end
 
     def to_s
@@ -164,33 +170,22 @@ module MaImmunizations
     end
 
     def vaccine
-      match = /Vaccinations offered:\s+(.+)$/.match(@paragraphs[2].content)
-      match && match[1]
+      @parsed_info['Vaccinations offered']
     end
 
     def age_groups
-      match = /Age groups served:\s+(.+)$/.match(@paragraphs[3].content)
-      match && match[1]
+      @parsed_info['Age groups served']
     end
 
     def additional_info
-      match = /Additional Information:\s+(.+)$/.match(@paragraphs[5].content)
-      match && match[1]
-    end
-
-    def parse_appointments
-      return 0 unless @paragraphs && @paragraphs[7]
-
-      match = /Available Appointments\s+: (\d+)/.match(@paragraphs[7].content)
-      return 0 unless match
-
-      match[1].to_i
+      @parsed_info['Additional Information']
     end
 
     def link
-      return nil unless @paragraphs[8]
+      a_tag = @paragraphs.last.search('a')
+      return nil unless a_tag.any?
 
-      'https://www.maimmunizations.org' + @paragraphs[8].search('a')[0]['href']
+      'https://www.maimmunizations.org' + a_tag[0]['href']
     end
 
     def name

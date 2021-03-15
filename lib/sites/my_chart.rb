@@ -8,22 +8,56 @@ module MyChart
     'UMass Memorial' => {
       token_url: 'https://mychartonline.umassmemorial.org/mychart/openscheduling?specialty=15&hidespecialtysection=1',
       scheduling_api_url: 'https://mychartonline.umassmemorial.org/MyChart/OpenScheduling/OpenScheduling/GetScheduleDays',
-      providers: %w[56394 56395 56396 56475 56476 56477 56526 56527 56528 56529 56530 56531 56554 56584 56596 57002 57003],
-      departments: %w[104001144 111029146 111029148],
+      api_payload: {
+        'view' => 'grouped',
+        'specList' => '15',
+        'vtList' => '5060',
+        'start' => '',
+        'filters' => {
+          'Providers' => {},
+          'Departments' => {},
+          'DaysOfWeek' => {},
+          'TimesOfDay': 'both',
+        },
+      },
       sign_up_page: 'https://mychartonline.umassmemorial.org/mychart/openscheduling?specialty=15&hidespecialtysection=1',
     },
+
     'SBCHC' => {
       token_url: 'https://mychartos.ochin.org/mychart/SignupAndSchedule/EmbeddedSchedule?id=1900119&dept=150001007&vt=1089&payor=-1,-2,-3,4653,1624,4660,4655,1292,4881,5543,5979,2209,5257,1026,1001,2998,3360,3502,4896,2731',
-      scheduling_api_url: 'https://mychartos.ochin.org/mychart/OpenScheduling/OpenScheduling/GetScheduleDays',
-      providers: %w[1900119],
-      departments: %w[150001007],
+      scheduling_api_url: 'https://mychartos.ochin.org/mychart/OpenScheduling/OpenScheduling/GetOpeningsForProvider',
+      api_payload: {
+        'id' => '1900119',
+        'vt' => '1089',
+        'dept' => '150001007',
+        'view' => 'grouped',
+        'start' => '',
+        'filters' => {
+          'Providers' => {},
+          'Departments' => {},
+          'DaysOfWeek' => {},
+          'TimesOfDay': 'both',
+        },
+      },
       sign_up_page: 'https://forms.office.com/Pages/ResponsePage.aspx?id=J8HP3h4Z8U-yP8ih3jOCukT-1W6NpnVIp4kp5MOEapVUOTNIUVZLODVSMlNSSVc2RlVMQ1o1RjNFUy4u',
     },
+
     'BMC' => {
       token_url: 'https://mychartscheduling.bmc.org/mychartscheduling/SignupAndSchedule/EmbeddedSchedule',
-      scheduling_api_url: 'https://mychartscheduling.bmc.org/MyChartscheduling/OpenScheduling/OpenScheduling/GetScheduleDays',
-      providers: %w[10033319 10033364 10033367 10033370 10033373],
-      departments: %w[10098241 10098242 10098243 10098244 10098245],
+      scheduling_api_url: 'https://mychartscheduling.bmc.org/MyChartscheduling/OpenScheduling/OpenScheduling/GetOpeningsForProvider',
+      api_payload: {
+        'id' => '10033319,10033364,10033367,10033370,10033706,10033373',
+        'vt' => '2008',
+        'dept' => '10098245,10098242,10098243,10098244,10108801,10098241',
+        'view' => 'grouped',
+        'start' => '',
+        'filters' => {
+          'Providers' => {},
+          'Departments' => {},
+          'DaysOfWeek' => {},
+          'TimesOfDay': 'both',
+        },
+      },
       sign_up_page: 'https://www.bmc.org/covid-19-vaccine-locations',
     },
   }.freeze
@@ -59,22 +93,11 @@ module MyChart
     end
 
     def appointments_json
-      params = {
-        'view' => 'grouped',
-        'specList' => '15',
-        'vtList' => '5060',
-        'start' => Time.now.strftime('%Y-%m-%d'),
-        'filters' => {
-          #'Providers' => @config[:providers].map { |p| [p, true] }.to_h,
-          #'Departments' => @config[:departments].map { |d| [d, true] }.to_h,
-          #'DaysOfWeek' => (0..6).map { |d| [d, true] }.to_h,
-          'Providers' => {},
-          'Departments' => {},
-          'DaysOfWeek' => {},
-          'TimesOfDay': 'both',
-        },
-      }
-      res = RestClient.post(@config[:scheduling_api_url], params, credentials)
+      res = RestClient.post(
+        "#{@config[:scheduling_api_url]}?noCache=#{Time.now.to_i}",
+        @config[:api_payload],
+        credentials
+      )
       JSON.parse(res.body)
     end
 

@@ -13,6 +13,7 @@ require_relative 'lib/sites/color'
 require_relative 'lib/sites/cvs'
 require_relative 'lib/sites/lowell_general'
 require_relative 'lib/sites/my_chart'
+require_relative 'lib/sites/zocdoc'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY'] || 60 # seconds
 
@@ -23,6 +24,7 @@ SCRAPERS = {
   'lowell_general' => LowellGeneral,
   'my_chart' => MyChart,
   'ma_immunizations' => MaImmunizations,
+  'zocdoc' => Zocdoc,
 }.freeze
 
 def all_clinics(scraper, storage, logger)

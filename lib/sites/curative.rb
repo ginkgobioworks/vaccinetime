@@ -47,13 +47,22 @@ module Curative
     end
 
     def appointments_are_visible?
-      return true unless ENV['ENVIRONMENT'] == 'production'
-
       now = Time.now
-      return false unless Date.today.thursday? && now.hour >= 8 && now.min >= 30
+      if ENV['ENVIRONMENT'] == 'production' && !(Date.today.thursday? && now.hour >= 8 && now.min >= 30)
+        @logger.info "[Curative] Site #{@site_num} is not Thursday after 8:30"
+        return false
+      end
+
+      if @json['invitation_required_for_public_booking'] == true
+        @logger.info "[Curative] Site #{@site_num} requires invitation"
+        return false
+      end
 
       base_site = RestClient.get(BASE_URL + @site_num.to_s)
-      return false if base_site.request.url.start_with?("#{QUEUE_SITE}/afterevent")
+      if base_site.request.url.start_with?("#{QUEUE_SITE}/afterevent")
+        @logger.info "[Curative] Site #{@site_num} event has ended"
+        return false
+      end
 
       true
     end

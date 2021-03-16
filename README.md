@@ -12,7 +12,11 @@ The following websites are currently checked:
 
 * https://www.maimmunizations.org - every site
 * https://curative.com - DoubleTree Hotel in Danvers, Eastfield Mall in Springfield, and Circuit City in Dartmouth
-* https://home.color.com - Natick Mall
+* https://home.color.com - Natick Mall, Reggie Lewis Center, Gillette Stadium, Fenway Park, Hynes Convention Center
+* https://www.cvs.com - every CVS pharmacy
+* https://www.lowellgeneralvaccine.com/ - Lowell General Hospital
+* MyChart - UMass Memorial, SBCHC, BMC
+* https://www.tuftsmcvaccine.org - Tufts Medical Center Vaccine Site
 
 ## Quick start
 

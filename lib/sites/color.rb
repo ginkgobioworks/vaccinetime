@@ -17,6 +17,10 @@ module Color
   }.freeze
 
   def self.all_clinics(storage, logger)
+    # Don't tweet in production until we can figure out what the
+    # preregistration system looks like
+    return [] if ENV['ENVIRONMENT'] == 'production'
+
     SITES.flat_map do |site_id, site_name|
       sleep(2)
       SentryHelper.catch_errors(logger, 'Color') do

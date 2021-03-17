@@ -58,7 +58,7 @@ module MyChart
           'TimesOfDay': 'both',
         },
       },
-      sign_up_page: 'https://www.bmc.org/covid-19-vaccine-locations',
+      sign_up_page: 'https://mychartscheduling.bmc.org/MyChartscheduling/covid19#/',
     },
   }.freeze
 

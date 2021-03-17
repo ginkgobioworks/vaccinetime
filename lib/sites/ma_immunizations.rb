@@ -170,7 +170,7 @@ module MaImmunizations
     end
 
     def city
-      match = address.match(/^.*, ([\w\d\s]+) MA,/i)
+      match = address.match(/^.*, ([\w\d\s]+) (MA|Massachusetts),/i)
       return nil unless match
 
       match[1]

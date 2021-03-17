@@ -32,7 +32,7 @@ describe 'MaImmunizations' do
       clinics = MaImmunizations.all_clinics(storage, logger)
       expect(redis).to receive(:get).exactly(3).times.and_return(nil)
       expect(redis).to receive(:set).once
-      expect(mock_twitter).to receive(:update).with('100 appointments available at Reggie Lewis State Track Athletic Ctr, Tremont Street, Boston, MA, USA on 03/01/2021. Check eligibility and sign up at https://www.maimmunizations.org/clinic/search?q[venue_search_name_or_venue_name_i_cont]=Reggie%20Lewis%20State%20Track%20Athletic%20Ctr,%20Tremont%20Street,%20Boston,%20MA,%20USA&')
+      expect(mock_twitter).to receive(:update).with('100 appointments available at Reggie Lewis State Track Athletic Ctr, Tremont Street, Boston, MA, USA in Boston MA on 03/01/2021. Check eligibility and sign up at https://www.maimmunizations.org/clinic/search?q[venue_search_name_or_venue_name_i_cont]=Reggie%20Lewis%20State%20Track%20Athletic%20Ctr,%20Tremont%20Street,%20Boston,%20MA,%20USA&')
       twitter.post(clinics)
     end
   end

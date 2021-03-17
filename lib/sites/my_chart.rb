@@ -103,13 +103,12 @@ module MyChart
 
     def clinics
       slots = {}
-      deps = departments
 
       @json['ByDateThenProviderCollated'].each do |date, date_info|
         date_info['ProvidersAndHours'].each do |_provider, provider_info|
           provider_info['DepartmentAndSlots'].each do |department, department_info|
             department_info['HoursAndSlots'].each do |_hour, hour_info|
-              slots[date] ||= { site: deps[department], slots: 0 }
+              slots[date] ||= { department: @json['AllDepartments'][department], slots: 0 }
               slots[date][:slots] += hour_info['Slots'].length
             end
           end
@@ -117,36 +116,58 @@ module MyChart
       end
 
       slots.map do |date, info|
-        @logger.info "[MyChart] Site #{info[:site]} on #{date}: found #{info[:slots]} appointments"
-        Clinic.new(info[:site], date, info[:slots], @config[:sign_up_page], @logger, @storage)
-      end
-    end
-
-    def departments
-      @json['AllDepartments'].transform_values do |info|
-        info['Name']
+        @logger.info "[MyChart] Site #{info[:department]['Name']} on #{date}: found #{info[:slots]} appointments"
+        Clinic.new(info[:department], date, info[:slots], @config[:sign_up_page], @logger, @storage)
       end
     end
   end
 
   class Clinic < BaseClinic
-    attr_reader :site, :date, :appointments, :link
+    attr_reader :date, :appointments, :link
 
-    def initialize(site, date, appointments, link, logger, storage)
+    def initialize(department, date, appointments, link, logger, storage)
       super(storage)
-      @site = site
+      @department = department
       @date = date
       @appointments = appointments
       @link = link
       @logger = logger
     end
 
+    def name
+      @department['Name']
+    end
+
+    def address
+      "#{@department['Address']['Street'].join(' ')}, #{city}, MA"
+    end
+
+    def city
+      @department['Address']['City'].split.map(&:capitalize).join(' ')
+    end
+
     def title
-      "#{@site} on #{@date}"
+      "#{name} on #{@date}"
     end
 
     def sign_up_page
       link
+    end
+
+    def slack_blocks
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
+        },
+      }
+    end
+
+    def twitter_text
+      txt = "#{appointments} appointments available at #{name}"
+      txt += " in #{city} MA" if city
+      txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
     end
   end
 end

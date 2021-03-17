@@ -169,6 +169,13 @@ module MaImmunizations
       @paragraphs[1].content.strip
     end
 
+    def city
+      match = address.match(/^.*, ([\w\d\s]+) MA,/i)
+      return nil unless match
+
+      match[1]
+    end
+
     def vaccine
       @parsed_info['Vaccinations offered']
     end
@@ -195,7 +202,7 @@ module MaImmunizations
 
     def date
       match = TITLE_MATCHER.match(title)
-      match && DateTime.parse(match[2])
+      match && match[2]
     end
 
     def slack_blocks
@@ -206,6 +213,12 @@ module MaImmunizations
           text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
         },
       }
+    end
+
+    def twitter_text
+      txt = "#{appointments} appointments available at #{name}"
+      txt += " in #{city} MA" if city
+      txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
     end
 
     def sign_up_page

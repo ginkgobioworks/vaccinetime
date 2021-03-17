@@ -68,4 +68,13 @@ describe TwitterClient do
       expect { twitter.post([]) }.not_to raise_exception
     end
   end
+
+  describe '#twitter_text' do
+    it 'posts about appointments with a link' do
+      mock_clinic = MockClinic.new(title: 'myclinic', appointments: 100, new_appointments: 20)
+      expect(mock_clinic.twitter_text).to eq(
+        '100 appointments available at myclinic. Check eligibility and sign up at clinicsite.com'
+      )
+    end
+  end
 end

@@ -30,7 +30,11 @@ class BaseClinic
   end
 
   def sign_up_page
-    raise NotImplementedError
+    link
+  end
+
+  def city
+    nil
   end
 
   def render_slack_appointments

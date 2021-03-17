@@ -11,23 +11,21 @@ class MockStorage
 end
 
 class MockClinic < BaseClinic
-  attr_reader :title, :appointments, :new_appointments, :link
+  attr_reader :title, :appointments, :new_appointments, :link, :city
 
   def initialize(title: 'Mock clinic on 01/01/2021',
                  appointments: 0,
                  new_appointments: 0,
                  link: 'clinicsite.com',
-                 last_posted_time: nil)
+                 last_posted_time: nil,
+                 city: nil)
     super(MockStorage.new(last_posted_time))
     @title = title
     @appointments = appointments
     @new_appointments = new_appointments
     @link = link
     @last_posted_time = last_posted_time
-  end
-
-  def twitter_text
-    "#{appointments} appointments available at #{title}. Check eligibility and sign up at #{link}"
+    @city = city
   end
 
   def storage_key

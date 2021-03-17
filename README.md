@@ -42,11 +42,11 @@ bundle install
 bundle exec ruby run.rb
 ```
 
-You can optionally run just a single scraper by providing an option `-s` to the
-`run.rb` script like this:
+You can optionally run a subset of scrapers by providing an option `-s` or
+`--scrapers` to the `run.rb` script like this:
 
 ```bash
-bundle exec ruby run.rb -s ma_immunizations
+bundle exec ruby run.rb -s ma_immunizations,cvs
 ```
 
 Running locally works fine on MacOS, but hasn't been tested elsewhere.

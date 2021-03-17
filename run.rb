@@ -27,20 +27,22 @@ SCRAPERS = {
   'zocdoc' => Zocdoc,
 }.freeze
 
-def all_clinics(scraper, storage, logger)
-  if scraper == 'all'
+def all_clinics(scrapers, storage, logger)
+  if scrapers == 'all'
     SCRAPERS.values.flat_map do |scraper_module|
       scraper_module.all_clinics(storage, logger)
     end
   else
-    scraper_module = SCRAPERS[scraper]
-    raise "Module #{scraper} not found" unless scraper_module
+    scrapers.flat_map do |scraper|
+      scraper_module = SCRAPERS[scraper]
+      raise "Module #{scraper} not found" unless scraper_module
 
-    scraper_module.all_clinics(storage, logger)
+      scraper_module.all_clinics(storage, logger)
+    end
   end
 end
 
-def main(scraper: 'all')
+def main(scrapers: 'all')
   environment = ENV['ENVIRONMENT'] || 'dev'
 
   if ENV['SENTRY_DSN']
@@ -62,14 +64,14 @@ def main(scraper: 'all')
 
   if ENV['SEED_REDIS']
     logger.info '[Main] Seeding redis with current appointments'
-    all_clinics(scraper, storage, logger).each(&:save_appointments)
+    all_clinics(scrapers, storage, logger).each(&:save_appointments)
     logger.info '[Main] Done seeding redis'
     sleep(UPDATE_FREQUENCY)
   end
 
   loop do
     logger.info '[Main] Started checking'
-    clinics = all_clinics(scraper, storage, logger)
+    clinics = all_clinics(scrapers, storage, logger)
 
     slack.post(clinics)
     twitter.post(clinics)
@@ -90,8 +92,8 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: bundle exec ruby run.rb [options]"
 
-  opts.on('-s', '--scraper SCRAPER', SCRAPERS.keys, "Scraper to run, choose from: #{SCRAPERS.keys.join(', ')}") do |s|
-    options[:scraper] = s
+  opts.on('-s', '--scrapers SCRAPER1,SCRAPER2', Array, "Scraper to run, choose from: #{SCRAPERS.keys.join(', ')}") do |s|
+    options[:scrapers] = s
   end
 end.parse!
 

@@ -9,7 +9,6 @@ require_relative './base_clinic'
 
 module LowellGeneral
   BASE_URL = 'https://www.lowellgeneralvaccine.com/schedule.html'.freeze
-  DOCTOR_URL = 'https://lowell-general-hospital---covid---19-vaccination.healthpost.com'.freeze
 
   def self.all_clinics(storage, logger)
     SentryHelper.catch_errors(logger, 'LowellGeneral') do
@@ -138,12 +137,16 @@ module LowellGeneral
       link
     end
 
+    def address
+      '1001 Pawtucket Boulevard East, Lowell MA 01854'
+    end
+
     def slack_blocks
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments:* #{render_slack_appointments}\n*Stations:* #{@stations.join(', ')}\n*Link:* #{link}",
+          text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_slack_appointments}\n*Stations:* #{@stations.join(', ')}\n*Link:* #{link}",
         },
       }
     end

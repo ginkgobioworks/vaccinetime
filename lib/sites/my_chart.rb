@@ -166,7 +166,7 @@ module MyChart
 
     def twitter_text
       txt = "#{appointments} appointments available at #{name}"
-      txt += " in #{city} MA" if city
+      txt += " in #{city}, MA" if city
       txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
     end
   end

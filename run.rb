@@ -17,7 +17,7 @@ require_relative 'lib/sites/zocdoc'
 require_relative 'lib/sites/harrington'
 require_relative 'lib/sites/trinity_health'
 
-UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY'] || 60 # seconds
+UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
 
 SCRAPERS = {
   'curative' => Curative,

@@ -33,15 +33,15 @@ SCRAPERS = {
 
 def all_clinics(scrapers, storage, logger)
   if scrapers == 'all'
-    SCRAPERS.values.flat_map do |scraper_module|
-      scraper_module.all_clinics(storage, logger)
+    SCRAPERS.values.each do |scraper_module|
+      yield scraper_module.all_clinics(storage, logger)
     end
   else
-    scrapers.flat_map do |scraper|
+    scrapers.each do |scraper|
       scraper_module = SCRAPERS[scraper]
       raise "Module #{scraper} not found" unless scraper_module
 
-      scraper_module.all_clinics(storage, logger)
+      yield scraper_module.all_clinics(storage, logger)
     end
   end
 end
@@ -68,19 +68,19 @@ def main(scrapers: 'all')
 
   if ENV['SEED_REDIS']
     logger.info '[Main] Seeding redis with current appointments'
-    all_clinics(scrapers, storage, logger).each(&:save_appointments)
+    all_clinics(scrapers, storage, logger) { |clinics| clinics.each(&:save_appointments) }
     logger.info '[Main] Done seeding redis'
     sleep(UPDATE_FREQUENCY)
   end
 
   loop do
     logger.info '[Main] Started checking'
-    clinics = all_clinics(scrapers, storage, logger)
+    all_clinics(scrapers, storage, logger) do |clinics|
+      slack.post(clinics)
+      twitter.post(clinics)
 
-    slack.post(clinics)
-    twitter.post(clinics)
-
-    clinics.each(&:save_appointments)
+      clinics.each(&:save_appointments)
+    end
 
     logger.info '[Main] Done checking'
     sleep(UPDATE_FREQUENCY)

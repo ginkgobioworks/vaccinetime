@@ -7,113 +7,118 @@ require_relative './base_clinic'
 module Zocdoc
   GQL_URL = 'https://api.zocdoc.com/directory/v2/gql'.freeze
   GQL_QUERY = %{
-    query providerLocationsAvailability($directoryId: String, $insurancePlanId: String, $isNewPatient: Boolean, $isReschedule: Boolean, $jumpAhead: Boolean, $firstAvailabilityMaxDays: Int, $numDays: Int, $procedureId: String, $providerLocationIds: [String], $searchRequestId: String, $startDate: String, $timeFilter: TimeFilter, $widget: Boolean) {
-      providerLocations(ids: $providerLocationIds) {
+    query VaccineTime($providers: [String]) {
+      providers(ids: $providers) {
         id
-        ...availability
-        __typename
-      }
-    }
-
-    fragment availability on ProviderLocation {
-      id
-      provider {
-        id
-        monolithId
-        __typename
-      }
-      location {
-        id
-        monolithId
-        state
-        phone
-        __typename
-      }
-      availability(directoryId: $directoryId, insurancePlanId: $insurancePlanId, isNewPatient: $isNewPatient, isReschedule: $isReschedule, jumpAhead: $jumpAhead, firstAvailabilityMaxDays: $firstAvailabilityMaxDays, numDays: $numDays, procedureId: $procedureId, searchRequestId: $searchRequestId, startDate: $startDate, timeFilter: $timeFilter, widget: $widget) {
-        times {
-          date
-          timeslots {
-            isResource
-            startTime
-            __typename
+        nameInSentence
+        providerLocations {
+          location {
+            address1
+            address2
+            city
+            state
+            zipCode
           }
-          __typename
+          availability(numDays: 28) {
+            times {
+              date
+              timeslots {
+                startTime
+              }
+            }
+          }
         }
-        firstAvailability {
-          startTime
-          __typename
-        }
-        showGovernmentInsuranceNotice
-        timesgridId
-        today
-        __typename
       }
-      __typename
     }
   }.freeze
 
   SITES = {
-    'Tufts Medical Center Vaccine Site - Boston' => {
-      sign_up_link: 'https://www.tuftsmcvaccine.org/',
-      gql_variables: {
-        directoryId: '1172',
-        insurancePlanId: '-1',
-        isNewPatient: false,
-        numDays: 21,
-        procedureId: '5243',
-        providerLocationIds: [
-          'pr_fSHH-Tyvm0SZvoK3pfH8tx|lo_EMLPse6C60qr6_M2rJmilx',
-        ],
-        widget: false,
-      },
+    'pr_fSHH-Tyvm0SZvoK3pfH8tx' => {
+      name: 'Tufts MC Vaccine Site - Boston Location',
+      sign_up_link: 'https://www.zocdoc.com/wl/tuftscovid19vaccination/patientvaccine',
+    },
+    'pr_BDBebslqJU2vrCAvVMhYeh' => {
+      name: 'Holtzman Medical Group - Mount Ida Campus',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_iXjD9x2P-0OrLNoIknFr8R' => {
+      name: 'AFC Saugus',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_TeD-JuoydUKqszEn2ATb8h' => {
+      name: 'AFC New Bedford',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_pEgrY3r5qEuYKsKvc4Kavx' => {
+      name: 'AFC Worcester',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_VUnpWUtg1k2WFBMK8IhZkx' => {
+      name: 'AFC Dedham',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_4Vg_3ZeLY0aHJJxsCU-WhB' => {
+      name: 'AFC West Springfield',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
+    'pr_CUmBnwtlz0C16bif5EU0IR' => {
+      name: 'AFC Springfield',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
     },
   }.freeze
 
   def self.all_clinics(storage, logger)
-    SITES.flat_map do |site_name, config|
-      sleep(2)
-      SentryHelper.catch_errors(logger, 'Zocdoc') do
-        logger.info "[Zocdoc] Checking site #{site_name}"
-        Page.new(storage, logger, site_name, config).clinics
+    logger.info '[Zocdoc] Checking site'
+    SentryHelper.catch_errors(logger, 'Zocdoc') do
+      fetch_graphql['providers'].flat_map do |provider|
+        Page.new(storage, logger, provider).clinics
       end
     end
   end
 
+  def self.fetch_graphql
+    res = RestClient.post(
+      GQL_URL,
+      {
+        operationName: 'VaccineTime',
+        query: GQL_QUERY,
+        variables: { providers: SITES.keys },
+      }.to_json,
+      content_type: :json
+    )
+    JSON.parse(res)['data']
+  end
+
   class Page
-    def initialize(storage, logger, site_name, config)
+    def initialize(storage, logger, provider)
       @storage = storage
       @logger = logger
-      @site_name = site_name
-      @config = config
+      @provider = provider
     end
 
-    def graphql_response
-      res = RestClient.post(
-        GQL_URL,
-        {
-          operationName: 'providerLocationsAvailability',
-          query: GQL_QUERY,
-          variables: @config[:gql_variables],
-        }.to_json,
-        content_type: :json
-      )
-      JSON.parse(res)['data']
+    def name
+      @provider['nameInSentence']
+    end
+
+    def sign_up_link
+      SITES[@provider['id']][:sign_up_link]
     end
 
     def clinics
-      graphql_response['providerLocations'].flat_map do |location|
+      @provider['providerLocations'].flat_map do |location|
         location['availability']['times'].map do |time|
           date = time['date']
           appointments = time['timeslots'].length
           if appointments.positive?
-            @logger.info "[Zocdoc] Site #{@site_name} on #{date}: found #{appointments} appointments"
+            @logger.info "[Zocdoc] Site #{name} on #{date}: found #{appointments} appointments"
           end
           Clinic.new(
             @storage,
-            @site_name,
-            @config[:sign_up_link],
+            name,
+            sign_up_link,
             date,
-            appointments
+            appointments,
+            location['location']
           )
         end
       end
@@ -123,20 +128,41 @@ module Zocdoc
   class Clinic < BaseClinic
     attr_reader :name, :link, :date, :appointments
 
-    def initialize(storage, name, link, date, appointments)
+    def initialize(storage, name, link, date, appointments, location)
       super(storage)
       @name = name
       @link = link
       @date = date
       @appointments = appointments
+      @location = location
+    end
+
+    def city
+      @location['city']
+    end
+
+    def address
+      addr = @location['address1']
+      addr += " #{@location['address2']}" unless @location['address2'].empty?
+      addr + ", #{@location['city']} #{@location['state']} #{@location['zipCode']}"
     end
 
     def title
-      "#{name} on #{date}"
+      "#{name} in #{city}, MA on #{date}"
     end
 
     def sign_up_page
       link
+    end
+
+    def slack_blocks
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
+        },
+      }
     end
   end
 end

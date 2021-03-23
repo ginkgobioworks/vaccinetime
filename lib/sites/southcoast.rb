@@ -91,7 +91,7 @@ module Southcoast
     end
 
     def title
-      "#{@site} on #{date}"
+      "Southcoast Health in #{@site}, MA on #{date}"
     end
 
     def link

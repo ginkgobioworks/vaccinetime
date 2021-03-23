@@ -14,7 +14,7 @@ require_relative 'lib/sites/cvs'
 require_relative 'lib/sites/lowell_general'
 require_relative 'lib/sites/my_chart'
 require_relative 'lib/sites/zocdoc'
-require_relative 'lib/sites/harrington'
+require_relative 'lib/sites/acuity'
 require_relative 'lib/sites/trinity_health'
 require_relative 'lib/sites/southcoast'
 
@@ -28,7 +28,7 @@ SCRAPERS = {
   'my_chart' => MyChart,
   'ma_immunizations' => MaImmunizations,
   'zocdoc' => Zocdoc,
-  'harrington' => Harrington,
+  'acuity' => Acuity,
   'trinity_health' => TrinityHealth,
   'southcoast' => Southcoast,
 }.freeze

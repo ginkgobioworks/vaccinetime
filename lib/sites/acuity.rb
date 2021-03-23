@@ -4,7 +4,7 @@ require 'nokogiri'
 require_relative '../sentry_helper'
 require_relative './base_clinic'
 
-module Harrington
+module Acuity
   SITES = {
     'Southbridge Community Center in Southbridge, MA' => {
       sign_up_url: 'https://www.harringtonhospital.org/coronavirus/covid-19-vaccination/',

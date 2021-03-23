@@ -8,7 +8,7 @@ require_relative '../sentry_helper'
 require_relative './base_clinic'
 
 module MaImmunizations
-  BASE_URL = "https://www.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
+  BASE_URL = "https://clinics.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
 
   def self.all_clinics(storage, logger)
     unconsolidated_clinics(storage, logger).each_with_object({}) do |clinic, h|

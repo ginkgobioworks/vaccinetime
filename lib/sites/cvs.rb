@@ -1,14 +1,12 @@
 require 'date'
 require 'json'
 require 'rest-client'
-require 'csv'
 
 require_relative './base_clinic'
 
 module Cvs
   STATE = 'MA'
   USER_AGENTS = []
-  CVS_CITIES = {}
 
   class CvsCity
     attr_reader :city, :stores, :should_tweet
@@ -25,15 +23,6 @@ module Cvs
       USER_AGENTS.append(line.strip)
     end
   end
-
-  CSV.read("#{__dir__}/config/cvs_locations.csv", headers: true).each do |row|
-    CVS_CITIES[row['city']] = CvsCity.new(row['city'], row['stores'].to_i, row['tweet'] == '1')
-  end
-
-  # This array also defines the order in which city names appear, the order is determined
-  # by the number of stores in a city.
-  TWEET_ALLOWED_CITIES = CVS_CITIES.keys.filter { |cvs_city| CVS_CITIES[cvs_city].should_tweet }
-                                   .sort_by { |cvs_city| -1 * CVS_CITIES[cvs_city].stores }
 
   def self.all_clinics(storage, logger)
     clinics = []
@@ -64,7 +53,7 @@ module Cvs
 
     def initialize(storage, cities, state)
       super(storage)
-      @cities = cities.sort_by { |city| -1 * (CVS_CITIES[city].nil? ? 1 : CVS_CITIES[city].stores) }
+      @cities = cities.sort
       @state = state
       @appointments = @cities.length
     end
@@ -139,12 +128,8 @@ module Cvs
       @cities - last_cities
     end
 
-    def tweet_allowed_new_cities
-      new_cities.filter { |new_city| TWEET_ALLOWED_CITIES.include? new_city }
-    end
-
     def should_tweet?
-      tweet_allowed_new_cities.length > 5 && has_not_posted_recently?
+      new_cities.length > 5 && has_not_posted_recently?
     end
   end
 

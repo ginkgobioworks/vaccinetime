@@ -18,7 +18,8 @@ The following websites are currently checked:
 * MyChart - UMass Memorial, SBCHC, BMC
 * https://www.tuftsmcvaccine.org - Tufts Medical Center Vaccine Site
 * https://www.harringtonhospital.org - Southbridge Community Center
-* https://www.trinityhealthofne.org/ - Trinity Health of New England
+* https://www.trinityhealthofne.org - Trinity Health of New England
+* https://www.southcoast.org - Southcoast Health
 
 ## Quick start
 

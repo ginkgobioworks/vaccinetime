@@ -20,6 +20,7 @@ The following websites are currently checked:
 * https://www.harringtonhospital.org - Southbridge Community Center
 * https://www.trinityhealthofne.org - Trinity Health of New England
 * https://www.southcoast.org - Southcoast Health
+* https://trinityems.com - Trinity EMS
 
 ## Quick start
 

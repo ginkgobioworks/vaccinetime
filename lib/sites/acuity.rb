@@ -6,7 +6,7 @@ require_relative './base_clinic'
 
 module Acuity
   SITES = {
-    'Southbridge Community Center in Southbridge, MA' => {
+    'Southbridge Community Center (non-local residents) in Southbridge, MA' => {
       sign_up_url: 'https://www.harringtonhospital.org/coronavirus/covid-19-vaccination/',
       api_url: 'https://app.acuityscheduling.com/schedule.php?action=showCalendar&fulldate=1&owner=22192301&template=weekly',
       api_params: {
@@ -20,6 +20,22 @@ module Acuity
         calendarID: 5202038,
       },
     },
+
+    'Southbridge Community Center (local residents only) in Southbridge, MA' => {
+      sign_up_url: 'https://www.harringtonhospital.org/coronavirus/covid-19-vaccination/',
+      api_url: 'https://app.acuityscheduling.com/schedule.php?action=showCalendar&fulldate=1&owner=22192301&template=weekly',
+      api_params: {
+        type: 20926295,
+        calendar: 5202050,
+        skip: true,
+        'options[qty]' => 1,
+        'options[numDays]' => 27,
+        ignoreAppointment: '',
+        appointmentType: '',
+        calendarID: 5202050,
+      },
+    },
+
     'Trinity EMS in Haverhill, MA' => {
       sign_up_url: 'https://trinityems.com/what-we-do/covid-19-vaccine-clinics/',
       api_url: 'https://app.acuityscheduling.com/schedule.php?action=showCalendar&fulldate=1&owner=21713854&template=weekly',

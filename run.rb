@@ -48,6 +48,13 @@ def all_clinics(scrapers, storage, logger)
   end
 end
 
+def sleep_for(frequency)
+  start_time = Time.now
+  yield
+  running_time = Time.now - start_time
+  sleep([frequency - running_time, 0].max)
+end
+
 def main(scrapers: 'all')
   environment = ENV['ENVIRONMENT'] || 'dev'
 
@@ -69,23 +76,24 @@ def main(scrapers: 'all')
   logger.info "[Main] Update frequency is set to every #{UPDATE_FREQUENCY} seconds"
 
   if ENV['SEED_REDIS']
-    logger.info '[Main] Seeding redis with current appointments'
-    all_clinics(scrapers, storage, logger) { |clinics| clinics.each(&:save_appointments) }
-    logger.info '[Main] Done seeding redis'
-    sleep(UPDATE_FREQUENCY)
+    sleep_for(UPDATE_FREQUENCY) do
+      logger.info '[Main] Seeding redis with current appointments'
+      all_clinics(scrapers, storage, logger) { |clinics| clinics.each(&:save_appointments) }
+      logger.info '[Main] Done seeding redis'
+    end
   end
 
   loop do
-    logger.info '[Main] Started checking'
-    all_clinics(scrapers, storage, logger) do |clinics|
-      slack.post(clinics)
-      twitter.post(clinics)
+    sleep_for(UPDATE_FREQUENCY) do
+      logger.info '[Main] Started checking'
+      all_clinics(scrapers, storage, logger) do |clinics|
+        slack.post(clinics)
+        twitter.post(clinics)
 
-      clinics.each(&:save_appointments)
+        clinics.each(&:save_appointments)
+      end
+      logger.info '[Main] Done checking'
     end
-
-    logger.info '[Main] Done checking'
-    sleep(UPDATE_FREQUENCY)
   end
 
 rescue => e

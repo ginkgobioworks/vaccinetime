@@ -36,20 +36,21 @@ module Acuity
       },
     },
 
-    'Trinity EMS in Haverhill, MA' => {
-      sign_up_url: 'https://trinityems.com/what-we-do/covid-19-vaccine-clinics/',
-      api_url: 'https://app.acuityscheduling.com/schedule.php?action=showCalendar&fulldate=1&owner=21713854&template=weekly',
-      api_params: {
-        type: 19620839,
-        calendar: 5109380,
-        skip: true,
-        'options[qty]' => 1,
-        'options[numDays]' => 5,
-        ignoreAppointment: '',
-        appointmentType: '',
-        calendarID: 5109380,
-      },
-    }
+    # NOTE: Trinity is showing a message that all appointment types are private
+    #'Trinity EMS in Haverhill, MA' => {
+      #sign_up_url: 'https://trinityems.com/what-we-do/covid-19-vaccine-clinics/',
+      #api_url: 'https://app.acuityscheduling.com/schedule.php?action=showCalendar&fulldate=1&owner=21713854&template=weekly',
+      #api_params: {
+        #type: 19620839,
+        #calendar: 5109380,
+        #skip: true,
+        #'options[qty]' => 1,
+        #'options[numDays]' => 5,
+        #ignoreAppointment: '',
+        #appointmentType: '',
+        #calendarID: 5109380,
+      #},
+    #}
   }.freeze
 
   def self.all_clinics(storage, logger)

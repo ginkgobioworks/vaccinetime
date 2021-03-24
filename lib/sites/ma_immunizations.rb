@@ -23,8 +23,8 @@ module MaImmunizations
   def self.unconsolidated_clinics(storage, logger)
     page_num = 1
     clinics = []
-    loop do
-      SentryHelper.catch_errors(logger, 'MaImmunizations', on_error: clinics) do
+    SentryHelper.catch_errors(logger, 'MaImmunizations', on_error: clinics) do
+      loop do
         raise "Too many pages: #{page_num}" if page_num > 100
 
         logger.info "[MaImmunizations] Checking page #{page_num}"
@@ -34,11 +34,12 @@ module MaImmunizations
 
         clinics += page.clinics
         return clinics if page.final_page?
-      end
 
-      page_num += 1
-      sleep(2)
+        page_num += 1
+        sleep(2)
+      end
     end
+    clinics
   end
 
   class Page
@@ -57,6 +58,7 @@ module MaImmunizations
     def fetch
       cookies = get_cookies
       response = RestClient.get(BASE_URL + "&page=#{@page}", cookies: cookies).body
+
       if CLINIC_PAGE_IDENTIFIER !~ response
         @logger.info '[MaImmunizations] Got waiting page'
         12.times do

@@ -199,12 +199,12 @@ module MaImmunizations
 
     def name
       match = TITLE_MATCHER.match(title)
-      match && match[1].strip
+      match[1].strip
     end
 
     def date
       match = TITLE_MATCHER.match(title)
-      match && match[2]
+      match[2]
     end
 
     def slack_blocks

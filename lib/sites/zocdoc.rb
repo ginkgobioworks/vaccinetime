@@ -106,7 +106,7 @@ module Zocdoc
 
     def clinics
       @provider['providerLocations'].flat_map do |location|
-        location['availability']['times'].map do |time|
+        (location.dig('availability', 'times') || []).map do |time|
           date = time['date']
           appointments = time['timeslots'].length
           if appointments.positive?

@@ -39,6 +39,8 @@ class TwitterClient
 
   rescue => e
     @logger.error "[TwitterClient] error: #{e}"
+    raise e unless ENV['ENVIRONMENT'] == 'production' || ENV['ENVIRONMENT'] == 'staging'
+
     Sentry.capture_exception(e)
   end
 

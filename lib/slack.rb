@@ -48,6 +48,8 @@ class SlackClient
 
   rescue => e
     @logger.error "[SlackClient] error: #{e}"
+    raise e unless ENV['ENVIRONMENT'] == 'production' || ENV['ENVIRONMENT'] == 'staging'
+
     Sentry.capture_exception(e)
   end
 

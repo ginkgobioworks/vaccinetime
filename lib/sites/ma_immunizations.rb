@@ -73,7 +73,7 @@ module MaImmunizations
         @logger.info '[MaImmunizations] Made it through waiting page'
         @waiting_page = false
       else
-        minutes_left = /estimated wait time is\s*([\d\w\s]+)\./.match(response.gsub('\n', ''))
+        minutes_left = /(\d+) minute/.match(response)
         if minutes_left
           @logger.info "[MaImmunizations] Waited too long, estimate left: #{minutes_left[1]}"
         else

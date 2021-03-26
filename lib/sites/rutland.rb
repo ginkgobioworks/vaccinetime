@@ -11,15 +11,20 @@ module Rutland
       res = RestClient.get(BASE_URL).body
       sites = res.scan(%r{www\.maimmunizations\.org__reg_(\d+)&})
       logger.info '[Rutland] No sites found' if sites.empty?
-      sites.map do |clinic_num|
+      sites.each_with_object(Hash.new(0)) do |clinic_num, h|
         sleep(2)
         reg_url = "https://registrations.maimmunizations.org//reg/#{clinic_num[0]}"
-        scrape_registration_site(storage, logger, reg_url)
-      end.compact
+        scrape_result = scrape_registration_site(logger, reg_url)
+        next unless scrape_result
+
+        h[scrape_result[0]] += scrape_result[1]
+      end.map do |title, appointments|
+        Clinic.new(storage, title, appointments)
+      end
     end
   end
 
-  def self.scrape_registration_site(storage, logger, url)
+  def self.scrape_registration_site(logger, url)
     logger.info "[Rutland] Checking site #{url}"
     res = RestClient.get(url).body
 
@@ -52,18 +57,17 @@ module Rutland
     end
 
     logger.info "[Rutland] Found #{appointments} at #{title}" if appointments.positive?
-    Clinic.new(storage, title, BASE_URL, appointments)
+    [title, appointments]
   end
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
 
-    attr_reader :title, :link, :appointments
+    attr_reader :title, :appointments
 
-    def initialize(storage, title, link, appointments)
+    def initialize(storage, title, appointments)
       super(storage)
       @title = title
-      @link = link
       @appointments = appointments
     end
 
@@ -76,6 +80,10 @@ module Rutland
     def date
       match = TITLE_MATCHER.match(title)
       match[2]
+    end
+
+    def link
+      BASE_URL
     end
 
     def twitter_text

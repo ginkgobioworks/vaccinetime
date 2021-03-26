@@ -22,6 +22,7 @@ The following websites are currently checked:
 * https://www.southcoast.org - Southcoast Health
 * https://www.northamptonma.gov/2219/Vaccine-Clinics - Northampton
 * https://www.rrecc.us/vaccine - Rutland
+* https://lawrencegeneralcovidvaccine.as.me/schedule.php - Lawrence General Hospital
 
 ## Quick start
 

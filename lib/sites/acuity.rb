@@ -36,6 +36,36 @@ module Acuity
       },
     },
 
+    'S. Lawrence East School in Lawrence, MA' => {
+      sign_up_url: 'https://lawrencegeneralcovidvaccine.as.me/schedule.php',
+      api_url: 'https://lawrencegeneralcovidvaccine.as.me/schedule.php?action=showCalendar&fulldate=1&owner=21579739&template=weekly',
+      api_params: {
+        type: 19267408,
+        calendar: 4896962,
+        skip: true,
+        'options[qty]' => 1,
+        'options[numDays]' => 27,
+        ignoreAppointment: '',
+        appointmentType: '',
+        calendarID: '',
+      },
+    },
+
+    'S. Lawrence East School (teachers only) in Lawrence, MA' => {
+      sign_up_url: 'https://lawrencegeneralcovidvaccine.as.me/schedule.php',
+      api_url: 'https://lawrencegeneralcovidvaccine.as.me/schedule.php?action=showCalendar&fulldate=1&owner=21579739&template=weekly',
+      api_params: {
+        type: 21491873,
+        calendar: 5299682,
+        skip: true,
+        'options[qty]' => 1,
+        'options[numDays]' => 27,
+        ignoreAppointment: '',
+        appointmentType: '',
+        calendarID: '',
+      },
+    },
+
     # NOTE: Trinity is showing a message that all appointment types are private
     #'Trinity EMS in Haverhill, MA' => {
       #sign_up_url: 'https://trinityems.com/what-we-do/covid-19-vaccine-clinics/',

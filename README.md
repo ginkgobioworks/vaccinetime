@@ -21,6 +21,7 @@ The following websites are currently checked:
 * https://www.trinityhealthofne.org - Trinity Health of New England
 * https://www.southcoast.org - Southcoast Health
 * https://www.northamptonma.gov/2219/Vaccine-Clinics - Northampton
+* https://www.rrecc.us/vaccine - Rutland
 
 ## Quick start
 

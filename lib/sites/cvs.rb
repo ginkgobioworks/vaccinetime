@@ -83,12 +83,12 @@ module Cvs
     end
 
     def twitter_text
-      new_cities = tweet_allowed_new_cities
-      cities_text = new_cities.shift
-      while (city = new_cities.shift) do
+      tweet_cities = new_cities
+      cities_text = tweet_cities.shift
+      while (city = tweet_cities.shift) do
         pending_text = ", #{city}"
         if cities_text.length + pending_text.length > 176
-          cities_text += ", and #{new_cities.length + 1} others"
+          cities_text += ", and #{tweet_cities.length + 1} others"
           break
         else
           cities_text += pending_text

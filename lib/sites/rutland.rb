@@ -87,7 +87,7 @@ module Rutland
     end
 
     def twitter_text
-      "#{appointments} appointments available at #{name} (teachers only) on #{date}. Check eligibility and sign up at #{sign_up_page}"
+      "#{appointments} appointments available at #{name} (teachers only) on #{date}. Check eligibility and sign up at #{sign_up_page} (link on bottom of page)"
     end
   end
 end

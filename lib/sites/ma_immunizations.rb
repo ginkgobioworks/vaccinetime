@@ -218,7 +218,9 @@ module MaImmunizations
     end
 
     def twitter_text
-      txt = "#{appointments} appointments available at #{name}"
+      txt = "#{appointments} "
+      txt += "#{vaccine} " if vaccine
+      txt += "appointments available at #{name}"
       txt += " in #{city}, MA" if city
       txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
     end

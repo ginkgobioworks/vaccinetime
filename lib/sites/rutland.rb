@@ -62,6 +62,8 @@ module Rutland
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
+    TWEET_INCREASE_NEEDED = 50
+    TWEET_COOLDOWN = 3600 # 1 hour
 
     attr_reader :title, :appointments
 

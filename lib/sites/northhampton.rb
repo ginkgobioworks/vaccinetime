@@ -41,7 +41,7 @@ module Northhampton
       return nil
     end
 
-    title = title_search[0].text.split('-')[1].strip
+    title = /Sign Up for Vaccinations - (.+)$/.match(title_search[0].text)[1].strip
     appointments = clinic.search('tbody tr').reduce(0) do |val, row|
       entry = row.search('td').last.text.split.join(' ')
       match = /(\d+) appointments available/.match(entry)

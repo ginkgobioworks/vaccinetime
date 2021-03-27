@@ -10,17 +10,21 @@ on Twitter when new appointments show up. The bot is written in
 
 The following websites are currently checked:
 
-* https://www.maimmunizations.org - every site
-* https://www.cvs.com - CVS pharmacies in MA
-* https://www.lowellgeneralvaccine.com - Lowell General Hospital
-* MyChart - UMass Memorial, SBCHC, BMC
-* https://www.tuftsmcvaccine.org - Tufts Medical Center Vaccine Site
-* https://www.harringtonhospital.org - Southbridge Community Center
-* https://www.trinityhealthofne.org - Trinity Health of New England
-* https://www.southcoast.org - Southcoast Health
-* https://www.northamptonma.gov/2219/Vaccine-Clinics - Northampton
-* https://www.rrecc.us/vaccine - Rutland
-* https://lawrencegeneralcovidvaccine.as.me/schedule.php - Lawrence General Hospital
+* [maimmunizations](https://www.maimmunizations.org) - every site
+* [CVS pharmacies in MA](https://www.cvs.com)
+* [Lowell General Hospital](https://www.lowellgeneralvaccine.com)
+* [BMC](https://www.bmc.org/covid-19-vaccine-locations)
+* [UMass Memorial](https://mychartonline.umassmemorial.org/mychart/openscheduling?specialty=15&hidespecialtysection=1)
+* [SBCHC](https://forms.office.com/Pages/ResponsePage.aspx?id=J8HP3h4Z8U-yP8ih3jOCukT-1W6NpnVIp4kp5MOEapVUOTNIUVZLODVSMlNSSVc2RlVMQ1o1RjNFUy4u)
+* [Lawrence General Hospital](https://lawrencegeneralcovidvaccine.as.me/schedule.php)
+* [Martha's Vineyard Hospital & Nantucket VFW](https://covidvaccine.massgeneralbrigham.org/)
+* [Tufts Medical Center Vaccine Site](https://www.tuftsmcvaccine.org)
+* [Zocdoc](https://www.zocdoc.com/vaccine/screener?state=MA)
+* [Southbridge Community Center](https://www.harringtonhospital.org)
+* [Trinity Health of New England](https://www.trinityhealthofne.org)
+* [Southcoast Health](https://www.southcoast.org)
+* [Northampton](https://www.northamptonma.gov/2219/Vaccine-Clinics)
+* [Rutland](https://www.rrecc.us/vaccine)
 
 ## Previously scraped websites
 

@@ -11,8 +11,6 @@ on Twitter when new appointments show up. The bot is written in
 The following websites are currently checked:
 
 * https://www.maimmunizations.org - every site
-* https://curative.com - DoubleTree Hotel in Danvers, Eastfield Mall in Springfield, and Circuit City in Dartmouth
-* https://home.color.com - Natick Mall, Reggie Lewis Center, Gillette Stadium, Fenway Park, Hynes Convention Center
 * https://www.cvs.com - CVS pharmacies in MA
 * https://www.lowellgeneralvaccine.com - Lowell General Hospital
 * MyChart - UMass Memorial, SBCHC, BMC
@@ -23,6 +21,15 @@ The following websites are currently checked:
 * https://www.northamptonma.gov/2219/Vaccine-Clinics - Northampton
 * https://www.rrecc.us/vaccine - Rutland
 * https://lawrencegeneralcovidvaccine.as.me/schedule.php - Lawrence General Hospital
+
+## Previously scraped websites
+
+The following websites have moved onto the
+[Massachusetts preregistration system](https://www.mass.gov/info-details/preregister-for-a-covid-19-vaccine-appointment),
+so their scrapers have been disabled:
+
+* https://curative.com - DoubleTree Hotel in Danvers, Eastfield Mall in Springfield, and Circuit City in Dartmouth
+* https://home.color.com - Natick Mall, Reggie Lewis Center, Gillette Stadium, Fenway Park, Hynes Convention Center
 
 ## Quick start
 

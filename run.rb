@@ -8,8 +8,8 @@ require_relative 'lib/twitter'
 
 # Sites
 require_relative 'lib/sites/ma_immunizations'
-require_relative 'lib/sites/curative'
-require_relative 'lib/sites/color'
+# require_relative 'lib/sites/curative'
+# require_relative 'lib/sites/color'
 require_relative 'lib/sites/cvs'
 require_relative 'lib/sites/lowell_general'
 require_relative 'lib/sites/my_chart'
@@ -23,8 +23,8 @@ require_relative 'lib/sites/rutland'
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
 
 SCRAPERS = {
-  'curative' => Curative,
-  'color' => Color,
+  # 'curative' => Curative,
+  # 'color' => Color,
   'cvs' => Cvs,
   'lowell_general' => LowellGeneral,
   'my_chart' => MyChart,

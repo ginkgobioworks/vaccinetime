@@ -16,7 +16,7 @@ module Curative
 
   def self.all_clinics(storage, logger)
     SITES.flat_map do |site_num, site_name|
-      sleep(2)
+      sleep(1)
       SentryHelper.catch_errors(logger, 'Curative') do
         logger.info "[Curative] Checking site #{site_num}: #{site_name}"
         Page.new(site_num, storage, logger).clinics

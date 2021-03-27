@@ -22,7 +22,7 @@ module Color
     return [] if ENV['ENVIRONMENT'] == 'production'
 
     SITES.flat_map do |site_id, site_name|
-      sleep(2)
+      sleep(1)
       SentryHelper.catch_errors(logger, 'Color') do
         logger.info "[Color] Checking site #{site_name}"
         Page.new(site_id, site_name, storage, logger).clinics

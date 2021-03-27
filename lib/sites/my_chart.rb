@@ -1,3 +1,4 @@
+require 'date'
 require 'nokogiri'
 
 require_relative '../sentry_helper'
@@ -21,10 +22,12 @@ module MyChart
       }
     end
 
-    def appointments_json
+    def appointments_json(start)
+      payload = api_payload
+      payload['start'] = start.strftime('%Y-%m-%d')
       res = RestClient.post(
         "#{scheduling_api_url}?noCache=#{Time.now.to_i}",
-        api_payload,
+        payload,
         credentials
       )
       JSON.parse(res.body)
@@ -32,17 +35,21 @@ module MyChart
 
     def clinics
       slots = {}
-      json = appointments_json
 
-      json['ByDateThenProviderCollated'].each do |date, date_info|
-        date_info['ProvidersAndHours'].each do |_provider, provider_info|
-          provider_info['DepartmentAndSlots'].each do |department, department_info|
-            department_info['HoursAndSlots'].each do |_hour, hour_info|
-              slots[date] ||= { department: json['AllDepartments'][department], slots: 0 }
-              slots[date][:slots] += hour_info['Slots'].length
+      date = Date.today
+      4.times do
+        json = appointments_json(date)
+        json['ByDateThenProviderCollated'].each do |date, date_info|
+          date_info['ProvidersAndHours'].each do |_provider, provider_info|
+            provider_info['DepartmentAndSlots'].each do |department, department_info|
+              department_info['HoursAndSlots'].each do |_hour, hour_info|
+                slots[date] ||= { department: json['AllDepartments'][department], slots: 0 }
+                slots[date][:slots] += hour_info['Slots'].length
+              end
             end
           end
         end
+        date += 7
       end
 
       slots.map do |date, info|

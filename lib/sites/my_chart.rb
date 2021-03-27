@@ -197,7 +197,7 @@ module MyChart
     end
   end
 
-  class MarthasVinyard < MassGeneralBrigham
+  class MarthasVineyard < MassGeneralBrigham
     def name
       "Martha's Vineyard Hospital"
     end
@@ -267,7 +267,7 @@ module MyChart
     UMassMemorial,
     BMC,
     SBCHC,
-    MarthasVinyard,
+    MarthasVineyard,
     Nantucket,
   ].freeze
 

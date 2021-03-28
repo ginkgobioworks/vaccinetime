@@ -36,7 +36,7 @@ module MaImmunizations
         return clinics if page.final_page?
 
         page_num += 1
-        sleep(2)
+        sleep(1)
       end
     end
     clinics
@@ -218,11 +218,11 @@ module MaImmunizations
     end
 
     def twitter_text
-      txt = "#{appointments} "
-      txt += "#{vaccine} " if vaccine
-      txt += "appointments available at #{name}"
+      txt = "#{appointments} appointments available at #{name}"
       txt += " in #{city}, MA" if city
-      txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
+      txt += " on #{date}"
+      txt += " for #{vaccine}" if vaccine
+      txt + ". Check eligibility and sign up at #{sign_up_page}"
     end
 
     def sign_up_page

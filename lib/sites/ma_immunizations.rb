@@ -139,8 +139,8 @@ module MaImmunizations
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
-    TWEET_INCREASE_NEEDED = 50
-    TWEET_COOLDOWN = 3600 # 1 hour
+    TWEET_INCREASE_NEEDED = ENV['MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::TWEET_INCREASE_NEEDED
+    TWEET_COOLDOWN = ENV['MA_IMMUNIZATIONS_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     attr_accessor :appointments
 

@@ -117,7 +117,7 @@ module MaImmunizations
       end
 
       results = container.search('> div.justify-between').map do |group|
-        Clinic.new(group, @storage)
+        Clinic.new(group, @storage, @logger)
       end.filter do |clinic|
         clinic.valid?
       end
@@ -142,8 +142,9 @@ module MaImmunizations
 
     attr_accessor :appointments
 
-    def initialize(group, storage)
+    def initialize(group, storage, logger)
       super(storage)
+      @logger = logger
       @group = group
       @paragraphs = group.search('p')
       @parsed_info = @paragraphs[2..].each_with_object({}) do |p, h|
@@ -190,6 +191,13 @@ module MaImmunizations
       @parsed_info['Additional Information']
     end
 
+    def clinic_link
+      a_tag = @paragraphs.last.search('a')
+      return nil unless a_tag.any?
+
+      'https://clinics.maimmunizations.org' + a_tag[0]['href']
+    end
+
     def link
       a_tag = @paragraphs.last.search('a')
       return nil unless a_tag.any?
@@ -215,6 +223,24 @@ module MaImmunizations
           text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
         },
       }
+    end
+
+    def should_tweet?
+      return false unless super
+
+      res = RestClient.get(clinic_link).body
+
+      if /Clinic does not have any appointment slots available/ =~ res
+        @logger.info "[MaImmunizations] No appointment slots available for #{title}"
+        return false
+      end
+
+      if /This clinic is closed/ =~ res
+        @logger.info "[MaImmunizations] Clinic is closed for #{title}"
+        return false
+      end
+
+      true
     end
 
     def twitter_text

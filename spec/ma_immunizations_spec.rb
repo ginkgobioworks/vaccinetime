@@ -27,18 +27,12 @@ describe 'MaImmunizations' do
       expect(FakeTwitter).to receive(:new).and_return(mock_twitter)
       twitter = TwitterClient.new(logger)
       response = double('RestClient::Response', body: fixture)
-      expect(RestClient).to receive(:get).with(
-        'https://clinics.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination&page=1',
-        cookies: 'foo'
-      ).and_return(response)
-      expect(RestClient).to receive(:get).with(
-        'https://clinics.maimmunizations.org/client/registration?clinic_id=2530'
-      ).and_return(double('RestClient::Response', body: ''))
+      expect(RestClient).to receive(:get).and_return(response)
       expect(redis).to receive(:get).with('vaccine-cookies:ma-immunization').and_return({ cookies: 'foo', expiration: Time.now + (60 * 60 * 24) }.to_json)
       clinics = MaImmunizations.all_clinics(storage, logger)
       expect(redis).to receive(:get).exactly(3).times.and_return(nil)
       expect(redis).to receive(:set).once
-      expect(mock_twitter).to receive(:update).with('100 appointments available at Reggie Lewis State Track Athletic Ctr, Tremont Street, Boston, MA, USA in Boston, MA on 03/01/2021 for Pfizer-BioNTech COVID-19 Vaccine. Check eligibility and sign up at https://www.maimmunizations.org/clinic/search?q[venue_search_name_or_venue_name_i_cont]=Reggie%20Lewis%20State%20Track%20Athletic%20Ctr,%20Tremont%20Street,%20Boston,%20MA,%20USA&')
+      expect(mock_twitter).to receive(:update).with('100 Pfizer-BioNTech COVID-19 Vaccine appointments available at Reggie Lewis State Track Athletic Ctr, Tremont Street, Boston, MA, USA in Boston, MA on 03/01/2021. Check eligibility and sign up at https://www.maimmunizations.org/clinic/search?q[venue_search_name_or_venue_name_i_cont]=Reggie%20Lewis%20State%20Track%20Athletic%20Ctr,%20Tremont%20Street,%20Boston,%20MA,%20USA&')
       twitter.post(clinics)
     end
   end

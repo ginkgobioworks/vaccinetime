@@ -39,6 +39,8 @@ module MyChart
       date = Date.today
       4.times do
         json = appointments_json(date)
+        break if json['ErrorCode']
+
         json['ByDateThenProviderCollated'].each do |date, date_info|
           date_info['ProvidersAndHours'].each do |_provider, provider_info|
             provider_info['DepartmentAndSlots'].each do |department, department_info|
@@ -160,6 +162,39 @@ module MyChart
     end
   end
 
+  class HarvardVanguardNeedham < Page
+    def name
+      'Harvard Vanguard Medical Associates - Needham'
+    end
+
+    def token_url
+      'https://myhealth.atriushealth.org/DPH?'
+    end
+
+    def scheduling_api_url
+      'https://myhealth.atriushealth.org/OpenScheduling/OpenScheduling/GetScheduleDays'
+    end
+
+    def api_payload
+      {
+        'view' => 'grouped',
+        'specList' => 121,
+        'vtList' => 1424,
+        'start' => '',
+        'filters': {
+          'Providers' => {},
+          'Departments' => {},
+          'DaysOfWeek' => {},
+          'TimesOfDay' => 'both',
+        },
+      }
+    end
+
+    def sign_up_page
+      'https://myhealth.atriushealth.org/fr/'
+    end
+  end
+
   class MassGeneralBrigham < Page
     def clinic_identifier
       raise NotImplementedError
@@ -269,11 +304,11 @@ module MyChart
     SBCHC,
     MarthasVineyard,
     Nantucket,
+    HarvardVanguardNeedham,
   ].freeze
 
   def self.all_clinics(storage, logger)
     ALL_PAGES.flat_map do |page_class|
-      sleep(2)
       SentryHelper.catch_errors(logger, 'MyChart') do
         page = page_class.new(storage, logger)
         logger.info "[MyChart] Checking site #{page.name}"

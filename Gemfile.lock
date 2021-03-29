@@ -69,11 +69,11 @@ GEM
       rspec-support (~> 3.10.0)
     rspec-support (3.10.2)
     ruby2_keywords (0.0.4)
-    sentry-ruby (4.3.0)
+    sentry-ruby (4.3.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       faraday (>= 1.0)
-      sentry-ruby-core (= 4.3.0)
-    sentry-ruby-core (4.3.0)
+      sentry-ruby-core (= 4.3.1)
+    sentry-ruby-core (4.3.1)
       concurrent-ruby
       faraday
     simple_oauth (0.3.1)

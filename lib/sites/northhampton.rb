@@ -12,11 +12,16 @@ module Northhampton
       res = RestClient.get(BASE_URL).body
       sites = res.scan(%r{https://www\.(maimmunizations\.org//reg/\d+)})
       logger.info '[Northhampton] No sites found' if sites.empty?
-      sites.map do |clinic_url|
-        sleep(2)
+      sites.each_with_object(Hash.new(0)) do |clinic_url, h|
+        sleep(1)
         reg_url = "https://registrations.#{clinic_url[0]}"
-        scrape_registration_site(storage, logger, reg_url)
-      end.compact
+        scrape_result = scrape_registration_site(storage, logger, reg_url)
+        next unless scrape_result
+
+        h[scrape_result[0]] += scrape_result[1]
+      end.map do |title, appointments|
+        Clinic.new(storage, title, BASE_URL, appointments)
+      end
     end
   end
 
@@ -53,7 +58,7 @@ module Northhampton
     end
 
     logger.info "[Northhampton] Found #{appointments} at #{title}" if appointments.positive?
-    Clinic.new(storage, title, BASE_URL, appointments)
+    [title, appointments]
   end
 
   class Clinic < BaseClinic

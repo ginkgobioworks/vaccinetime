@@ -4,14 +4,14 @@ require 'nokogiri'
 require_relative '../sentry_helper'
 require_relative './base_clinic'
 
-module Northhampton
+module Northampton
   BASE_URL = 'https://www.northamptonma.gov/2219/Vaccine-Clinics'.freeze
 
   def self.all_clinics(storage, logger)
-    SentryHelper.catch_errors(logger, 'Northhampton') do
+    SentryHelper.catch_errors(logger, 'Northampton') do
       res = RestClient.get(BASE_URL).body
       sites = res.scan(%r{https://www\.(maimmunizations\.org//reg/\d+)})
-      logger.info '[Northhampton] No sites found' if sites.empty?
+      logger.info '[Northampton] No sites found' if sites.empty?
       sites.each_with_object(Hash.new(0)) do |clinic_url, h|
         sleep(1)
         reg_url = "https://registrations.#{clinic_url[0]}"
@@ -26,11 +26,11 @@ module Northhampton
   end
 
   def self.scrape_registration_site(storage, logger, url)
-    logger.info "[Northhampton] Checking site #{url}"
+    logger.info "[Northampton] Checking site #{url}"
     res = RestClient.get(url).body
 
     if /Clinic does not have any appointment slots available/ =~ res
-      logger.info '[Northhampton] No appointment slots available'
+      logger.info '[Northampton] No appointment slots available'
       return nil
     end
 
@@ -42,7 +42,7 @@ module Northhampton
     clinic = Nokogiri::HTML(res)
     title_search = clinic.search('h1')
     unless title_search.any?
-      logger.warn '[Northhampton] No title found'
+      logger.warn '[Northampton] No title found'
       return nil
     end
 
@@ -57,7 +57,7 @@ module Northhampton
       end
     end
 
-    logger.info "[Northhampton] Found #{appointments} at #{title}" if appointments.positive?
+    logger.info "[Northampton] Found #{appointments} at #{title}" if appointments.positive?
     [title, appointments]
   end
 

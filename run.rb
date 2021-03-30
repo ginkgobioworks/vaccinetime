@@ -17,7 +17,7 @@ require_relative 'lib/sites/zocdoc'
 require_relative 'lib/sites/acuity'
 require_relative 'lib/sites/trinity_health'
 require_relative 'lib/sites/southcoast'
-require_relative 'lib/sites/northhampton'
+require_relative 'lib/sites/northampton'
 require_relative 'lib/sites/rutland'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
@@ -33,7 +33,7 @@ SCRAPERS = {
   'acuity' => Acuity,
   'trinity_health' => TrinityHealth,
   'southcoast' => Southcoast,
-  'northhampton' => Northhampton,
+  'northampton' => Northampton,
   'rutland' => Rutland,
 }.freeze
 

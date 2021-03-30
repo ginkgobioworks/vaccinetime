@@ -47,7 +47,7 @@ module Cvs
   end
 
   class StateClinic < BaseClinic
-    LAST_SEEN_CITIES_KEY = "cvs-last-cities".freeze
+    LAST_SEEN_CITIES_KEY = 'cvs-last-cities'.freeze
 
     attr_accessor :appointments
 
@@ -83,26 +83,30 @@ module Cvs
     end
 
     def twitter_text
+      tweet_groups = []
+
       tweet_cities = new_cities
       cities_text = tweet_cities.shift
       while (city = tweet_cities.shift) do
         pending_text = ", #{city}"
-        if cities_text.length + pending_text.length > 176
-          cities_text += ", and #{tweet_cities.length + 1} others"
-          break
+        if cities_text.length + pending_text.length > 192
+          tweet_groups << cities_text
+          cities_text = city
         else
           cities_text += pending_text
         end
       end
+      tweet_groups << cities_text
 
       #  30 chars: "CVS appointments available in "
-      # 176 chars: max of cities_text
-      #  16 chars: ", and NNN others"
+      # 192 chars: max of cities_text
       #  35 chars: ". Check eligibility and sign up at "
       #  23 chars: shortened link
       # ---------
       # 280 chars total, 280 is the maximum
-      "CVS appointments available in #{cities_text}. Check eligibility and sign up at #{sign_up_page}"
+      tweet_groups.map do |group|
+        "CVS appointments available in #{group}. Check eligibility and sign up at #{sign_up_page}"
+      end
     end
 
     def slack_blocks

@@ -35,7 +35,12 @@ class TwitterClient
 
   def tweet(clinic)
     @logger.info "[TwitterClient] Sending tweet for #{clinic.title} (#{clinic.new_appointments} new appointments)"
-    @twitter.update(clinic.twitter_text)
+    text = clinic.twitter_text
+    if text.is_a?(Array)
+      text.each { |t| @twitter.update(t) }
+    else
+      @twitter.update(text)
+    end
 
   rescue => e
     @logger.error "[TwitterClient] error: #{e}"

@@ -162,6 +162,39 @@ module MyChart
     end
   end
 
+  class BMCCommunity < Page
+    def name
+      'BMC Community' end
+
+    def token_url
+      'https://mychartscheduling.bmc.org/MyChartscheduling/SignupAndSchedule/EmbeddedSchedule'
+    end
+
+    def scheduling_api_url
+      'https://mychartscheduling.bmc.org/MyChartscheduling/OpenScheduling/OpenScheduling/GetOpeningsForProvider'
+    end
+
+    def api_payload
+      {
+        'id' => '10033822,10033823,10033824,10033825,10033826,10033827',
+        'vt' => '2008',
+        'dept' => '10098241,10098242,10098243,10098244,10098245,10108801',
+        'view' => 'grouped',
+        'start' => '',
+        'filters' => {
+          'Providers' => {},
+          'Departments' => {},
+          'DaysOfWeek' => {},
+          'TimesOfDay': 'both',
+        },
+      }
+    end
+
+    def sign_up_page
+      'https://www.bmc.org/bmc-community-covid-vaccine-scheduling'
+    end
+  end
+
   class HarvardVanguardNeedham < Page
     def name
       'Harvard Vanguard Medical Associates - Needham'
@@ -301,6 +334,7 @@ module MyChart
   ALL_PAGES = [
     UMassMemorial,
     BMC,
+    BMCCommunity,
     SBCHC,
     MarthasVineyard,
     Nantucket,

@@ -63,8 +63,8 @@ class BaseClinic
 
   def should_tweet?
     link &&
-      appointments > self.class::TWEET_THRESHOLD &&
-      new_appointments > self.class::TWEET_INCREASE_NEEDED &&
+      appointments >= self.class::TWEET_THRESHOLD &&
+      new_appointments >= self.class::TWEET_INCREASE_NEEDED &&
       has_not_posted_recently?
   end
 

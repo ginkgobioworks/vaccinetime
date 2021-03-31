@@ -133,7 +133,7 @@ module Cvs
     end
 
     def should_tweet?
-      new_cities.length > 5 && has_not_posted_recently?
+      new_cities.length >= 5 && has_not_posted_recently?
     end
   end
 

@@ -25,6 +25,7 @@ The following websites are currently checked:
 * [Southcoast Health](https://www.southcoast.org)
 * [Northampton](https://www.northamptonma.gov/2219/Vaccine-Clinics)
 * [Rutland](https://www.rrecc.us/vaccine)
+* [Heywood Healthcare](https://gardnervaccinations.as.me/schedule.php)
 
 ## Previously scraped websites
 

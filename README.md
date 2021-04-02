@@ -26,6 +26,7 @@ The following websites are currently checked:
 * [Northampton](https://www.northamptonma.gov/2219/Vaccine-Clinics)
 * [Rutland](https://www.rrecc.us/vaccine)
 * [Heywood Healthcare](https://gardnervaccinations.as.me/schedule.php)
+* [Vaccinespotter](https://www.vaccinespotter.org/MA/) - Pharmacies other than CVS
 
 ## Previously scraped websites
 

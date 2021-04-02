@@ -82,7 +82,7 @@ module Vaccinespotter
     end
 
     def should_tweet?
-      link && new_cities.length >= 5 && has_not_posted_recently?
+      link && new_appointments >= 5 && has_not_posted_recently?
     end
 
     def slack_blocks

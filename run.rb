@@ -20,6 +20,7 @@ require_relative 'lib/sites/southcoast'
 require_relative 'lib/sites/northampton'
 require_relative 'lib/sites/rutland'
 require_relative 'lib/sites/heywood_healthcare'
+require_relative 'lib/sites/vaccinespotter'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
 
@@ -37,6 +38,7 @@ SCRAPERS = {
   'northampton' => Northampton,
   'rutland' => Rutland,
   'heywood_healthcare' => HeywoodHealthcare,
+  'vaccinespotter' => Vaccinespotter,
 }.freeze
 
 def all_clinics(scrapers, storage, logger)

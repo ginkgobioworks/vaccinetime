@@ -41,6 +41,10 @@ module Zocdoc
       name: 'Holtzman Medical Group - Mount Ida Campus',
       sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
     },
+    'pr_MFpAkwJEAEaLWrzldda5NR' => {
+      name: 'Holtzman Medical Group - Educational Staff Clinics',
+      sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
+    },
     'pr_iXjD9x2P-0OrLNoIknFr8R' => {
       name: 'AFC Saugus',
       sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',

@@ -45,7 +45,7 @@ module Vaccinespotter
     end
 
     def cities
-      @stores.map { |store| store['city'] }.compact.uniq
+      @stores.map { |store| store['city'] }.compact.uniq.sort
     end
 
     def title
@@ -90,7 +90,7 @@ module Vaccinespotter
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in #{cities.join(', ')}*\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Link:* #{link}",
         },
       }
     end
@@ -105,7 +105,7 @@ module Vaccinespotter
       # 280 chars total, 280 is the maximum
       text_limit = 280 - (title.length + 27 + 35 + 23)
 
-      tweet_cities = new_cities
+      tweet_cities = cities
       cities_text = tweet_cities.shift
       while (city = tweet_cities.shift)
         pending_text = ", #{city}"

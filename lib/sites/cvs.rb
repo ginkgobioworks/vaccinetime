@@ -85,7 +85,7 @@ module Cvs
     def twitter_text
       tweet_groups = []
 
-      tweet_cities = new_cities
+      tweet_cities = @cities
       cities_text = tweet_cities.shift
       while (city = tweet_cities.shift) do
         pending_text = ", #{city}"
@@ -114,7 +114,7 @@ module Cvs
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in #{@cities.join(', ')}*\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{@cities.join(', ')}\n*Link:* #{link}",
         },
       }
     end

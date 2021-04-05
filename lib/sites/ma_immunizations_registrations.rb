@@ -94,5 +94,15 @@ module MaImmunizationsRegistrations
       txt += " (#{@additional_info})" if @additional_info
       txt + ". Check eligibility and sign up at #{sign_up_page}"
     end
+
+    def slack_blocks
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: "*#{title}*\n*Vaccine:* #{vaccine}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{@additional_info}\n*Link:* #{link}",
+        },
+      }
+    end
   end
 end

@@ -139,6 +139,7 @@ module MaImmunizations
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
+    TWEET_THRESHOLD = ENV['MA_IMMUNIZATIONS_TWEET_THRESHOLD']&.to_i || BaseClinic::TWEET_THRESHOLD
     TWEET_INCREASE_NEEDED = ENV['MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::TWEET_INCREASE_NEEDED
     TWEET_COOLDOWN = ENV['MA_IMMUNIZATIONS_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 

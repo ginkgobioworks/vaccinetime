@@ -5,6 +5,10 @@ class BaseClinic
   TWEET_INCREASE_NEEDED = 5
   TWEET_COOLDOWN = 600 # 10 minutes
 
+  # Pharmacies treat 1 store = 1 appointment, so the thresholds are lower
+  PHARMACY_TWEET_THRESHOLD = 5
+  PHARMACY_TWEET_INCREASE_NEEDED = 2
+
   def initialize(storage)
     @storage = storage
   end

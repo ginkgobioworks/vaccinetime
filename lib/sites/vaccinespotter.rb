@@ -37,8 +37,8 @@ module Vaccinespotter
 
   class Clinic < BaseClinic
     LAST_SEEN_STORAGE_PREFIX = 'vaccinespotter-last-cities'.freeze
-    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || 5
-    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || 2
+    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
+    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
     TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     def initialize(storage, brand, stores)

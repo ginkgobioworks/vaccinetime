@@ -14,6 +14,7 @@ module MaImmunizations
     unconsolidated_clinics(storage, logger).each_with_object({}) do |clinic, h|
       if h[clinic.title]
         h[clinic.title].appointments += clinic.appointments
+        h[clinic.title].vaccines.merge(clinic.vaccines) if clinic.appointments.positive?
       else
         h[clinic.title] = clinic
       end
@@ -143,7 +144,7 @@ module MaImmunizations
     TWEET_INCREASE_NEEDED = ENV['MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::TWEET_INCREASE_NEEDED
     TWEET_COOLDOWN = ENV['MA_IMMUNIZATIONS_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
-    attr_accessor :appointments
+    attr_accessor :appointments, :vaccines
 
     def initialize(group, storage)
       super(storage)
@@ -156,6 +157,10 @@ module MaImmunizations
         h[match[1].strip] = match[2].strip
       end
       @appointments = @parsed_info['Available Appointments'].to_i
+      @vaccines = Set.new
+      if @appointments.positive? && @parsed_info['Vaccinations offered']
+        @vaccines.add(@parsed_info['Vaccinations offered'])
+      end
     end
 
     def valid?
@@ -215,7 +220,7 @@ module MaImmunizations
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccine}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
+          text: "*#{title}*\n*Address:* #{address}\n*Vaccine:* #{vaccines.join(', ')}\n*Age groups*: #{age_groups}\n*Available appointments:* #{render_slack_appointments}\n*Additional info:* #{additional_info}\n*Link:* #{link}",
         },
       }
     end
@@ -224,7 +229,7 @@ module MaImmunizations
       txt = "#{appointments} appointments available at #{name}"
       txt += " in #{city}, MA" if city
       txt += " on #{date}"
-      txt += " for #{vaccine}" if vaccine
+      txt += " for #{vaccines.join(', ')}" if vaccines.any?
       txt + ". Check eligibility and sign up at #{sign_up_page}"
     end
 

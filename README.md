@@ -46,9 +46,13 @@ docker-compose up
 ```
 
 This will run the bot without tweeting, instead sending any activity to a
-"FakeTwitter" class that outputs to the terminal. Logs are also stored in files
-in the `log/` directory. To set up real tweets, see the configuration section
-below.
+"FakeTwitter" class that outputs to the terminal. To set up real tweets, see
+the configuration section below.
+
+Logs are stored in files in the `log/` directory, and any errors will terminate
+the program by default and print the error trace. Set the environment variable
+`ENVIRONMENT=production` to keep running even if an error occurs (errors will
+still get logged).
 
 ### Running locally
 
@@ -91,7 +95,7 @@ setting the following environment variables:
 Additional configuration can be done with the following:
 
 * SENTRY_DSN - sets up error handling with [Sentry](https://sentry.io)
-* ENVIRONMENT - configures Sentry environment
+* ENVIRONMENT - configures Sentry environment and error handling
 * UPDATE_FREQUENCY - number of seconds to wait between updates (default 60)
 * SEED_REDIS - set to true to seed redis with the first batch of found
   appointments (useful for deploying to fresh redis instances)

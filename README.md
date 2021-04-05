@@ -96,6 +96,23 @@ Additional configuration can be done with the following:
 * SEED_REDIS - set to true to seed redis with the first batch of found
   appointments (useful for deploying to fresh redis instances)
 
+### Site specific configuration
+
+There are also some site specific configurations to allow for tweaking behavior
+at runtime without having to change the code:
+
+MaImmunizations configuration:
+
+* MA_IMMUNIZATIONS_TWEET_THRESHOLD
+* MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED
+* MA_IMMUNIZATIONS_TWEET_COOLDOWN
+
+CVS and Vaccinespotter configuration:
+
+* PHARMACY_TWEET_THRESHOLD
+* PHARMACY_TWEET_INCREASE_NEEDED
+* PHARMACY_TWEET_COOLDOWN
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute. We

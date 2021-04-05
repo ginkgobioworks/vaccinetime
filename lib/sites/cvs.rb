@@ -48,6 +48,9 @@ module Cvs
 
   class StateClinic < BaseClinic
     LAST_SEEN_CITIES_KEY = 'cvs-last-cities'.freeze
+    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || 5
+    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || 2
+    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     attr_accessor :appointments
 
@@ -130,10 +133,6 @@ module Cvs
 
     def new_cities
       @cities - last_cities
-    end
-
-    def should_tweet?
-      new_cities.length >= 5 && has_not_posted_recently?
     end
   end
 

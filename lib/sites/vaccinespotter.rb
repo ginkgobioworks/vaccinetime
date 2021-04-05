@@ -37,6 +37,9 @@ module Vaccinespotter
 
   class Clinic < BaseClinic
     LAST_SEEN_STORAGE_PREFIX = 'vaccinespotter-last-cities'.freeze
+    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || 5
+    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || 2
+    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     def initialize(storage, brand, stores)
       super(storage)
@@ -79,10 +82,6 @@ module Vaccinespotter
 
     def link
       @stores.detect { |s| s['url'] }['url']
-    end
-
-    def should_tweet?
-      link && new_appointments >= 5 && has_not_posted_recently?
     end
 
     def slack_blocks

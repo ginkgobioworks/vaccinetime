@@ -7,7 +7,7 @@ module MaImmunizationsRegistrations
   def self.all_clinics(sign_up_page, pages, storage, logger, additional_info = nil)
     pages.each_with_object(Hash.new(0)) do |clinic_url, h|
       sleep(1)
-      scrape_result = scrape_registration_site(logger, clinic_url)
+      scrape_result = scrape_registration_site(logger, clinic_url, additional_info)
       next unless scrape_result
 
       h[[scrape_result[0], scrape_result[1]]] += scrape_result[2]
@@ -16,8 +16,8 @@ module MaImmunizationsRegistrations
     end
   end
 
-  def self.scrape_registration_site(logger, url)
-    logger.info "[MaImmunizationsRegistrations] Checking site #{url}"
+  def self.scrape_registration_site(logger, url, additional_info)
+    logger.info "[MaImmunizationsRegistrations] Checking site #{url} #{additional_info}"
     res = RestClient.get(url).body
 
     if /Clinic does not have any appointment slots available/ =~ res

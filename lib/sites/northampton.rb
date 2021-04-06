@@ -11,14 +11,18 @@ module Northampton
     SentryHelper.catch_errors(logger, 'Northampton') do
       res = RestClient.get(BASE_URL).body
       sites = res.scan(%r{https://www\.(maimmunizations\.org//reg/\d+)})
-      logger.info '[Northampton] No sites found' if sites.empty?
-
-      MaImmunizationsRegistrations.all_clinics(
-        BASE_URL,
-        sites.map { |clinic_url| "https://registrations.#{clinic_url[0]}" },
-        storage,
-        logger
-      )
+      if sites.empty?
+        logger.info '[Northampton] No sites found'
+      else
+        logger.info "[Northampton] #{sites.length} sites found"
+        MaImmunizationsRegistrations.all_clinics(
+          BASE_URL,
+          sites.map { |clinic_url| "https://registrations.#{clinic_url[0]}" },
+          storage,
+          logger,
+          'Northampton'
+        )
+      end
     end
   end
 end

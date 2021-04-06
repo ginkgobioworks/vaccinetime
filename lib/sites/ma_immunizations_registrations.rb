@@ -4,10 +4,10 @@ require 'nokogiri'
 require_relative './base_clinic'
 
 module MaImmunizationsRegistrations
-  def self.all_clinics(sign_up_page, pages, storage, logger, additional_info = nil)
+  def self.all_clinics(sign_up_page, pages, storage, logger, log_module, additional_info = nil)
     pages.each_with_object(Hash.new(0)) do |clinic_url, h|
       sleep(1)
-      scrape_result = scrape_registration_site(logger, clinic_url, additional_info)
+      scrape_result = scrape_registration_site(logger, log_module, clinic_url)
       next unless scrape_result
 
       h[[scrape_result[0], scrape_result[1]]] += scrape_result[2]
@@ -16,24 +16,23 @@ module MaImmunizationsRegistrations
     end
   end
 
-  def self.scrape_registration_site(logger, url, additional_info)
-    logger.info "[MaImmunizationsRegistrations] Checking site #{url} #{additional_info}"
+  def self.scrape_registration_site(logger, log_module, url)
     res = RestClient.get(url).body
 
     if /Clinic does not have any appointment slots available/ =~ res
-      logger.info '[MaImmunizationsRegistrations] No appointment slots available'
+      logger.info "[#{log_module}] No appointment slots available"
       return nil
     end
 
     if /This clinic is closed/ =~ res
-      logger.info '[MaImmunizationsRegistrations] Clinic is closed'
+      logger.info "[#{log_module}] Clinic is closed"
       return nil
     end
 
     clinic = Nokogiri::HTML(res)
     title_search = clinic.search('h1')
     unless title_search.any?
-      logger.warn '[MaImmunizationsRegistrations] No title found'
+      logger.warn "[#{log_module}] No title found"
       return nil
     end
 
@@ -58,7 +57,7 @@ module MaImmunizationsRegistrations
       vaccine = 'Janssen COVID-19 Vaccine'
     end
 
-    logger.info "[MaImmunizationsRegistrations] Found #{appointments} at #{title}" if appointments.positive?
+    logger.info "[#{log_module}] Found #{appointments} at #{title}" if appointments.positive?
     [title, vaccine, appointments]
   end
 

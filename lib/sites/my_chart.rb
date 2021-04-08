@@ -56,8 +56,12 @@ module MyChart
 
       slots.map do |date, info|
         @logger.info "[MyChart] Site #{info[:department]['Name']} on #{date}: found #{info[:slots]} appointments"
-        Clinic.new(info[:department], date, info[:slots], sign_up_page, @logger, @storage)
+        Clinic.new(info[:department], date, info[:slots], sign_up_page, @logger, @storage, storage_key_prefix)
       end
+    end
+
+    def storage_key_prefix
+      nil
     end
   end
 
@@ -143,9 +147,9 @@ module MyChart
 
     def api_payload
       {
-        'id' => '10033319,10033364,10033367,10033370,10033706,10033373',
+        'id' => '10033909,10033319,10033364,10033367,10033370,10033706,10033373',
         'vt' => '2008',
-        'dept' => '10098245,10098242,10098243,10098244,10108801,10098241',
+        'dept' => '10098252,10098245,10098242,10098243,10098244,10108801,10098241',
         'view' => 'grouped',
         'start' => '',
         'filters' => {
@@ -159,6 +163,10 @@ module MyChart
 
     def sign_up_page
       'https://mychartscheduling.bmc.org/MyChartscheduling/covid19#/'
+    end
+
+    def storage_key_prefix
+      "BMC - #{title}"
     end
   end
 
@@ -176,9 +184,9 @@ module MyChart
 
     def api_payload
       {
-        'id' => '10033822,10033823,10033824,10033825,10033826,10033827',
+        'id' => '10098241,10098242,10098243,10098244,10098245,10108801',
         'vt' => '2008',
-        'dept' => '10098241,10098242,10098243,10098244,10098245,10108801',
+        'dept' => '10033822,10033823,10033824,10033825,10033826,100338271',
         'view' => 'grouped',
         'start' => '',
         'filters' => {
@@ -191,7 +199,11 @@ module MyChart
     end
 
     def sign_up_page
-      'https://www.bmc.org/bmc-community-covid-vaccine-scheduling'
+      'https://www.bmc.org/community-covid-vaccine-scheduling'
+    end
+
+    def storage_key_prefix
+      "BMC Community - #{title}"
     end
   end
 
@@ -354,13 +366,14 @@ module MyChart
   class Clinic < BaseClinic
     attr_reader :date, :appointments, :link
 
-    def initialize(department, date, appointments, link, logger, storage)
+    def initialize(department, date, appointments, link, logger, storage, storage_key_prefix)
       super(storage)
       @department = department
       @date = date
       @appointments = appointments
       @link = link
       @logger = logger
+      @storage_key_prefix = storage_key_prefix
     end
 
     def name
@@ -397,6 +410,14 @@ module MyChart
       txt = "#{appointments} appointments available at #{name}"
       txt += " in #{city}, MA" if city
       txt + " on #{date}. Check eligibility and sign up at #{sign_up_page}"
+    end
+
+    def storage_key
+      if @storage_key_prefix
+        "#{@storage_key_prefix} #{title}"
+      else
+        title
+      end
     end
   end
 end

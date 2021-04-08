@@ -166,7 +166,7 @@ module MyChart
     end
 
     def storage_key_prefix
-      "BMC - #{title}"
+      'BMC'
     end
   end
 
@@ -203,7 +203,7 @@ module MyChart
     end
 
     def storage_key_prefix
-      "BMC Community - #{title}"
+      'BMC Community'
     end
   end
 
@@ -414,7 +414,7 @@ module MyChart
 
     def storage_key
       if @storage_key_prefix
-        "#{@storage_key_prefix} #{title}"
+        "#{@storage_key_prefix}:#{title}"
       else
         title
       end

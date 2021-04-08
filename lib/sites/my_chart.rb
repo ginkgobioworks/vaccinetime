@@ -183,10 +183,19 @@ module MyChart
     end
 
     def api_payload
+      html = Nokogiri::HTML(RestClient.get(sign_up_page).body)
+      iframe = html.search('iframe#openSchedulingFrame')
+      raise "Couldn't find scheduling iframe" unless iframe.any?
+
+      iframe_src = iframe[0]['src']
+      id = iframe_src.match(/id=([\d,]+)&/)[1]
+      dept = iframe_src.match(/dept=([\d,]+)&/)[1]
+      vt = iframe_src.match(/vt=(\d+)/)[1]
+
       {
-        'id' => '10098241,10098242,10098243,10098244,10098245,10108801',
-        'vt' => '2008',
-        'dept' => '10033822,10033823,10033824,10033825,10033826,100338271',
+        'id' => id,
+        'vt' => vt,
+        'dept' => dept,
         'view' => 'grouped',
         'start' => '',
         'filters' => {

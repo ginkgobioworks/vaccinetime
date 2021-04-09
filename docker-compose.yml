@@ -1,11 +1,14 @@
 version: '2'
 services:
-  vaccine-bot:
+  vaccinetime:
     build: .
+    volumes:
+      - .:/usr/src/app
     links:
       - redis
     environment:
       REDIS_URL: redis://redis
+      IN_DOCKER: 'true'
     stdin_open: true
     tty: true
 

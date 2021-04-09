@@ -1,5 +1,6 @@
 require 'json'
 require 'rest-client'
+require 'ferrum'
 
 require_relative '../sentry_helper'
 require_relative './base_clinic'
@@ -13,9 +14,12 @@ module BaystateHealth
   # clinic without a date
   def self.all_clinics(storage, logger)
     logger.info '[BaystateHealth] Checking site'
+
     clinic = Clinic.new(storage)
 
     SentryHelper.catch_errors(logger, 'BaystateHealth') do
+      return [] unless registration_available?(logger)
+
       JSON.parse(RestClient.get(API_URL).body)['campaigns'].each do |campaign|
         next unless campaign['active'] == 1
 
@@ -34,6 +38,39 @@ module BaystateHealth
     end
 
     [clinic]
+  end
+
+  def self.registration_available?(logger)
+    browser = if ENV['IN_DOCKER'] == 'true'
+                Ferrum::Browser.new(browser_options: { 'no-sandbox': nil })
+              else
+                Ferrum::Browser.new
+              end
+
+    browser.goto(SIGN_UP_URL)
+
+    5.times do
+      browser.network.wait_for_idle
+      html = Nokogiri.parse(browser.body)
+
+      h3 = html.search('.content-card h3')
+      if h3.any?
+        browser.quit
+        if h3[0].text.include?('Registration Temporarily Unavailable')
+          logger.info '[BaystateHealth] Registration unavailable'
+          return false
+        else
+          return true
+        end
+      else
+        sleep 1
+      end
+    end
+
+    logger.info "[BaystateHealth] Didn't load"
+    browser.quit
+
+    false
   end
 
   class Clinic < BaseClinic

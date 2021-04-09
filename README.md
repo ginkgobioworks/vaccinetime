@@ -56,9 +56,10 @@ still get logged).
 
 ### Running locally
 
-The bot uses [Redis](https://redis.io/) for storage, but has no other
-dependencies. If you wish to run the bot locally, install Redis and run it
-locally with `redis-server`, then run:
+The bot uses [Redis](https://redis.io/) for storage and Chrome or Chromium for
+browser automation. If you wish to run the bot locally, install Chrome/Chromium
+and Redis, and run redis locally with `redis-server`. Finally install the ruby
+dependencies with:
 
 ```bash
 bundle install

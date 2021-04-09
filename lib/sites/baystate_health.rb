@@ -1,7 +1,7 @@
 require 'json'
 require 'rest-client'
-require 'ferrum'
 
+require_relative '../browser'
 require_relative '../sentry_helper'
 require_relative './base_clinic'
 
@@ -41,36 +41,28 @@ module BaystateHealth
   end
 
   def self.registration_available?(logger)
-    browser = if ENV['IN_DOCKER'] == 'true'
-                Ferrum::Browser.new(browser_options: { 'no-sandbox': nil })
-              else
-                Ferrum::Browser.new
-              end
+    Browser.run do |browser|
+      browser.goto(SIGN_UP_URL)
 
-    browser.goto(SIGN_UP_URL)
+      5.times do
+        browser.network.wait_for_idle
+        html = Nokogiri.parse(browser.body)
 
-    5.times do
-      browser.network.wait_for_idle
-      html = Nokogiri.parse(browser.body)
-
-      h3 = html.search('.content-card h3')
-      if h3.any?
-        browser.quit
-        if h3[0].text.include?('Registration Temporarily Unavailable')
-          logger.info '[BaystateHealth] Registration unavailable'
-          return false
+        h3 = html.search('.content-card h3')
+        if h3.any?
+          if h3[0].text.include?('Registration Temporarily Unavailable')
+            logger.info '[BaystateHealth] Registration unavailable'
+            return false
+          else
+            return true
+          end
         else
-          return true
+          sleep 1
         end
-      else
-        sleep 1
       end
+
+      false
     end
-
-    logger.info "[BaystateHealth] Didn't load"
-    browser.quit
-
-    false
   end
 
   class Clinic < BaseClinic

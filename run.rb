@@ -43,13 +43,17 @@ SCRAPERS = {
   'baystate_health' => BaystateHealth,
 }.freeze
 
-def all_clinics(scrapers, storage, logger)
+def all_clinics(storage, logger, scrapers: 'all', except: [])
   if scrapers == 'all'
-    SCRAPERS.values.each do |scraper_module|
+    SCRAPERS.each do |scraper_name, scraper_module|
+      next if except.include?(scraper_name)
+
       yield scraper_module.all_clinics(storage, logger)
     end
   else
     scrapers.each do |scraper|
+      next if except.include?(scraper)
+
       scraper_module = SCRAPERS[scraper]
       raise "Module #{scraper} not found" unless scraper_module
 
@@ -65,7 +69,7 @@ def sleep_for(frequency)
   sleep([frequency - running_time, 0].max)
 end
 
-def main(scrapers: 'all')
+def main(opts)
   environment = ENV['ENVIRONMENT'] || 'dev'
 
   if ENV['SENTRY_DSN']
@@ -88,7 +92,7 @@ def main(scrapers: 'all')
   if ENV['SEED_REDIS']
     sleep_for(UPDATE_FREQUENCY) do
       logger.info '[Main] Seeding redis with current appointments'
-      all_clinics(scrapers, storage, logger) { |clinics| clinics.each(&:save_appointments) }
+      all_clinics(storage, logger, **opts) { |clinics| clinics.each(&:save_appointments) }
       logger.info '[Main] Done seeding redis'
     end
   end
@@ -96,7 +100,7 @@ def main(scrapers: 'all')
   loop do
     sleep_for(UPDATE_FREQUENCY) do
       logger.info '[Main] Started checking'
-      all_clinics(scrapers, storage, logger) do |clinics|
+      all_clinics(storage, logger, **opts) do |clinics|
         slack.post(clinics)
         twitter.post(clinics)
 
@@ -119,6 +123,10 @@ OptionParser.new do |opts|
   opts.on('-s', '--scrapers SCRAPER1,SCRAPER2', Array, "Scraper to run, choose from: #{SCRAPERS.keys.join(', ')}") do |s|
     options[:scrapers] = s
   end
+
+  opts.on('-e', '--except SCRAPER1,SCRAPER2', Array, "Scrapers not to run, choose from: #{SCRAPERS.keys.join(', ')}") do |e|
+    options[:except] = e
+  end
 end.parse!
 
-main(**options)
+main(options)

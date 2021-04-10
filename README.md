@@ -28,6 +28,7 @@ The following websites are currently checked:
 * [Heywood Healthcare](https://gardnervaccinations.as.me/schedule.php)
 * [Vaccinespotter](https://www.vaccinespotter.org/MA/) - Pharmacies other than CVS
 * [Pediatric Associates of Greater Salem](https://consumer.scheduling.athena.io/?departmentId=2804-102)
+* [Costco](https://www.costco.com/covid-vaccine.html)
 
 ## Previously scraped websites
 

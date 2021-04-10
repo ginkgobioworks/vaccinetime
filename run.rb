@@ -22,6 +22,7 @@ require_relative 'lib/sites/rutland'
 require_relative 'lib/sites/heywood_healthcare'
 require_relative 'lib/sites/vaccinespotter'
 require_relative 'lib/sites/baystate_health'
+require_relative 'lib/sites/athena'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
 
@@ -41,6 +42,7 @@ SCRAPERS = {
   'heywood_healthcare' => HeywoodHealthcare,
   'vaccinespotter' => Vaccinespotter,
   'baystate_health' => BaystateHealth,
+  'athena' => Athena,
 }.freeze
 
 def all_clinics(storage, logger, scrapers: 'all', except: [])

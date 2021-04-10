@@ -27,6 +27,7 @@ The following websites are currently checked:
 * [Rutland](https://www.rrecc.us/vaccine)
 * [Heywood Healthcare](https://gardnervaccinations.as.me/schedule.php)
 * [Vaccinespotter](https://www.vaccinespotter.org/MA/) - Pharmacies other than CVS
+* [Pediatric Associates of Greater Salem](https://consumer.scheduling.athena.io/?departmentId=2804-102)
 
 ## Previously scraped websites
 

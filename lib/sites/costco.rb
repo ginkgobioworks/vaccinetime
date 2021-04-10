@@ -5,33 +5,20 @@ require_relative '../sentry_helper'
 require_relative './base_clinic'
 
 module Costco
-  LOCATION_URL = 'https://book.appointment-plus.com/book-appointment/get-clients'.freeze
+  BASE_API_URL = 'https://book.appointment-plus.com/book-appointment'.freeze
+  LOCATION_URL = "#{BASE_API_URL}/get-clients".freeze
+  EMPLOYEE_URL = "#{BASE_API_URL}/get-employees".freeze
+  SERVICES_URL = "#{BASE_API_URL}/get-services".freeze
+  APPOINTMENT_URL = "#{BASE_API_URL}/get-grid-hours".freeze
 
   def self.all_clinics(storage, logger)
     logger.info '[Costco] Checking site'
 
     SentryHelper.catch_errors(logger, 'Costco') do
-      cities = JSON.parse(
-        RestClient.get(
-          LOCATION_URL,
-          params: {
-            clientMasterId: 426227,
-            pageNumber: 1,
-            itemsPerPage: 10,
-            keyword: '01545',
-            clientId: '',
-            employeeId: '',
-            'centerCoordinates[id]' => 528587,
-            'centerCoordinates[latitude]' => 42.283459,
-            'centerCoordinates[longitude]' => -71.726662,
-            'centerCoordinates[accuracy]' => '',
-            'centerCoordinates[whenAdded]' => '2021-04-10 11:09:11',
-            'centerCoordinates[searchQuery]' => '01545',
-            radiusInKilometers: 100,
-          }
-        ).body
-      )['clientObjects'].filter do |client|
-        client['state'] == 'MA' && client['displayToCustomer'] == true
+      cities = get_locations['clientObjects'].filter do |client|
+        client['state'] == 'MA' &&
+          client['displayToCustomer'] == true &&
+          has_appointments?(client['id'], client['clientMasterId'])
       end.map do |client|
         client['locationName'].gsub('Costco', '').strip
       end.sort
@@ -39,6 +26,97 @@ module Costco
       logger.info "[Costco] Found appointments in #{cities.join(', ')}" if cities.any?
       [Clinic.new(storage, cities)]
     end
+  end
+
+  def self.has_appointments?(client_id, client_master_id)
+    employees = get_employees(client_id, client_master_id)
+    return false unless employees['employeeObjects'].any?
+
+    employee_id = employees['employeeObjects'][0]['id']
+    services = get_services(client_id, client_master_id, employee_id)
+    return false unless services.any?
+
+    appointments = get_appointments(client_master_id, employee_id, services)
+    appointments['data']['gridHours'].any?
+  end
+
+  def self.get_locations
+    JSON.parse(
+      RestClient.get(
+        LOCATION_URL,
+        params: {
+          clientMasterId: 426227,
+          pageNumber: 1,
+          itemsPerPage: 10,
+          keyword: '01545',
+          clientId: '',
+          employeeId: '',
+          'centerCoordinates[id]' => 528587,
+          'centerCoordinates[latitude]' => 42.283459,
+          'centerCoordinates[longitude]' => -71.726662,
+          'centerCoordinates[accuracy]' => '',
+          'centerCoordinates[whenAdded]' => '2021-04-10 11:09:11',
+          'centerCoordinates[searchQuery]' => '01545',
+          radiusInKilometers: 100,
+          '_' => Time.now.to_i
+        }
+      ).body
+    )
+  end
+
+  def self.get_employees(client_id, client_master_id)
+    JSON.parse(
+      RestClient.get(
+        EMPLOYEE_URL,
+        params: {
+          clientMasterId: client_master_id,
+          clientId: client_id,
+          pageNumber: 1,
+          itemsPerPage: 10,
+          keyword: '',
+          employeeObjects: '',
+          '_' => Time.now.to_i
+        }
+      ).body
+    )
+  end
+
+  def self.get_services(client_id, client_master_id, employee_id)
+    JSON.parse(
+      RestClient.get(
+        "#{SERVICES_URL}/#{employee_id}",
+        params: {
+          clientMasterId: client_master_id,
+          clientId: client_id,
+          pageNumber: 1,
+          itemsPerPage: 10,
+          keyword: '',
+          serviceId: '',
+          '_' => Time.now.to_i,
+        }
+      ).body
+    )['serviceObjects'].map { |service| service['id'] }
+  end
+
+  def self.get_appointments(client_master_id, employee_id, services)
+    JSON.parse(
+      RestClient.get(
+        APPOINTMENT_URL,
+        params: {
+          startTimestamp: Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+          endTimestamp: (Date.today + 28).strftime('%Y-%m-%d %H:%M:%S'),
+          limitNumberOfDaysWithOpenSlots: 5,
+          employeeId: employee_id,
+          services: services,
+          numberOfSpotsNeeded: 1,
+          isStoreHours: true,
+          clientMasterId: client_master_id,
+          toTimeZone: false,
+          fromTimeZone: 149,
+          '_' => Time.now.to_i
+        }
+      ).body
+    )
   end
 
   class Clinic < BaseClinic

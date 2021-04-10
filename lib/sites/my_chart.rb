@@ -355,7 +355,7 @@ module MyChart
   ALL_PAGES = [
     UMassMemorial,
     BMC,
-    BMCCommunity,
+    #BMCCommunity,
     SBCHC,
     MarthasVineyard,
     Nantucket,

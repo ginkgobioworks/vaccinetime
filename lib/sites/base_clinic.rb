@@ -64,9 +64,8 @@ class BaseClinic
     (Time.now - last_posted_time) > self.class::TWEET_COOLDOWN # 10 minutes
   end
 
-
   def should_tweet?
-    link &&
+    !link.nil? &&
       appointments >= self.class::TWEET_THRESHOLD &&
       new_appointments >= self.class::TWEET_INCREASE_NEEDED &&
       has_not_posted_recently?

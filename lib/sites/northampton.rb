@@ -14,7 +14,7 @@ module Northampton
       if sites.empty?
         logger.info '[Northampton] No sites found'
       else
-        logger.info "[Northampton] #{sites.length} sites found"
+        logger.info "[Northampton] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(
           BASE_URL,
           sites.map { |clinic_url| "https://registrations.#{clinic_url[0]}" },

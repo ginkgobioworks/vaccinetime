@@ -29,6 +29,7 @@ The following websites are currently checked:
 * [Vaccinespotter](https://www.vaccinespotter.org/MA/) - Pharmacies other than CVS
 * [Pediatric Associates of Greater Salem](https://consumer.scheduling.athena.io/?departmentId=2804-102)
 * [Costco](https://www.costco.com/covid-vaccine.html)
+* [Hannaford](https://hannafordsched.rxtouch.com/rbssched/program/covid19/Patient)
 
 ## Previously scraped websites
 

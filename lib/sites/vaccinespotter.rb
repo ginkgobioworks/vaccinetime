@@ -22,12 +22,20 @@ module Vaccinespotter
       properties = feature['properties']
       next unless properties
 
-      brand = properties['provider_brand_name']
+      brand = get_brand(properties['provider_brand_name'])
       appointments_available = properties['appointments_available']
       next unless brand && appointments_available && brand != 'CVS'
 
       h[brand] ||= []
       h[brand] << properties
+    end
+  end
+
+  def self.get_brand(brand_name)
+    if ['Price Chopper', 'Market 32'].include?(brand_name)
+      'Price Chopper/Market 32'
+    else
+      brand_name
     end
   end
 

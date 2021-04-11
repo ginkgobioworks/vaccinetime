@@ -30,6 +30,7 @@ The following websites are currently checked:
 * [Pediatric Associates of Greater Salem](https://consumer.scheduling.athena.io/?departmentId=2804-102)
 * [Costco](https://www.costco.com/covid-vaccine.html)
 * [Hannaford](https://hannafordsched.rxtouch.com/rbssched/program/covid19/Patient)
+* [Color](https://home.color.com) - Lawrence General Hospital
 
 ## Previously scraped websites
 

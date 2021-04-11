@@ -10,10 +10,11 @@ module Color
   TOKEN_URL = "#{BASE_URL}/get_onsite_claim".freeze
   APPOINTMENT_URL = "#{BASE_URL}/vaccination_appointments/availability".freeze
   SITES = {
-    'natickmall' => 'Natick Mall',
-    'reggielewis' => 'Reggie Lewis Center',
-    'gillettestadium' => 'Gillette Stadium',
-    'fenway-hynes' => 'Fenway Park/Hynes Convention Center',
+    #'natickmall' => 'Natick Mall',
+    #'reggielewis' => 'Reggie Lewis Center',
+    #'gillettestadium' => 'Gillette Stadium',
+    #'fenway-hynes' => 'Fenway Park/Hynes Convention Center',
+    'lawrencegeneral' => 'Lawrence General Hospital',
   }.freeze
 
   def self.all_clinics(storage, logger)

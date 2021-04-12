@@ -14,4 +14,16 @@ module Browser
       browser.quit
     end
   end
+
+  def self.wait_for(browser, css)
+    10.times do
+      browser.network.wait_for_idle
+
+      tag = browser.at_css(css)
+      return tag if tag
+
+      sleep 1
+    end
+    nil
+  end
 end

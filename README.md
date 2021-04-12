@@ -31,6 +31,7 @@ The following websites are currently checked:
 * [Costco](https://www.costco.com/covid-vaccine.html)
 * [Hannaford](https://hannafordsched.rxtouch.com/rbssched/program/covid19/Patient)
 * [Color](https://home.color.com) - Lawrence General Hospital
+* [Walgreens](https://www.walgreens.com/findcare/vaccination/covid-19/)
 
 ## Previously scraped websites
 

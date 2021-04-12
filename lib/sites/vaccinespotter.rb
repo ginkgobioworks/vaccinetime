@@ -6,6 +6,7 @@ require_relative './base_clinic'
 
 module Vaccinespotter
   API_URL = 'https://www.vaccinespotter.org/api/v0/states/MA.json'.freeze
+  IGNORE_BRANDS = ['CVS', 'Walgreens'].freeze
 
   def self.all_clinics(storage, logger)
     SentryHelper.catch_errors(logger, 'Vaccinespotter') do
@@ -24,7 +25,7 @@ module Vaccinespotter
 
       brand = get_brand(properties['provider_brand_name'])
       appointments_available = properties['appointments_available']
-      next unless brand && appointments_available && brand != 'CVS'
+      next unless brand && appointments_available && !IGNORE_BRANDS.include?(brand)
 
       h[brand] ||= []
       h[brand] << properties

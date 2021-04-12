@@ -25,7 +25,7 @@ require_relative 'lib/sites/baystate_health'
 require_relative 'lib/sites/athena'
 require_relative 'lib/sites/costco'
 require_relative 'lib/sites/rxtouch'
-require_relative 'lib/sites/walgreens'
+#require_relative 'lib/sites/walgreens'
 
 UPDATE_FREQUENCY = ENV['UPDATE_FREQUENCY']&.to_i || 60 # seconds
 
@@ -48,7 +48,7 @@ SCRAPERS = {
   'athena' => Athena,
   'costco' => Costco,
   'rxtouch' => Rxtouch,
-  'walgreens' => Walgreens,
+  #'walgreens' => Walgreens, NOTE not working yet
 }.freeze
 
 def all_clinics(storage, logger, scrapers: 'all', except: [])

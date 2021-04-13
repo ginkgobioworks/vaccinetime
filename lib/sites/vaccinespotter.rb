@@ -6,7 +6,7 @@ require_relative './base_clinic'
 
 module Vaccinespotter
   API_URL = 'https://www.vaccinespotter.org/api/v0/states/MA.json'.freeze
-  IGNORE_BRANDS = ['CVS', 'Walgreens'].freeze
+  IGNORE_BRANDS = ['CVS', 'Costco', 'Hannaford'].freeze
 
   def self.all_clinics(storage, logger)
     SentryHelper.catch_errors(logger, 'Vaccinespotter') do

@@ -27,7 +27,7 @@ module LowellGeneral
 
   def self.fetch_appointments(logger)
     base_page = RestClient::Request.execute(url: SIGN_UP_URL, method: :get, verify_ssl: false).body
-    if /Vaccine appointments are full at this time/ =~ base_page
+    if /Schedule My Appointment/ !~ base_page
       logger.info('[LowellGeneral] No vaccine appointments available')
       return { 'appointments' => [] }
     end

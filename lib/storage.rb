@@ -1,6 +1,5 @@
 require 'redis'
 require 'json'
-require 'time'
 
 class Storage
   APPOINTMENT_KEY = 'slack-vaccine-appt'.freeze

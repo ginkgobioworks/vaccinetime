@@ -36,10 +36,12 @@ module TrinityHealth
 
   def self.fetch_day(date)
     day = date.strftime('%m/%d/%Y')
-    RestClient.post(
-      "#{BASE_URL}/livesearch.php",
-      { ScheduleDay: day },
-      cookies: { SiteName: 'THOfNE Mercy Medical Center' }
+    RestClient::Request.execute(
+      url: "#{BASE_URL}/livesearch.php",
+      method: :post,
+      payload: { ScheduleDay: day },
+      cookies: { SiteName: 'THOfNE Mercy Medical Center' },
+      verify_ssl: false
     ).body
   end
 

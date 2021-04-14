@@ -1,6 +1,6 @@
 require 'date'
 require 'json'
-require 'open-uri'
+require 'rest-client'
 
 require_relative '../sentry_helper'
 require_relative './base_clinic'
@@ -31,10 +31,25 @@ module Color
     def initialize(site_id, site_name, storage, logger)
       @site_id = site_id
       @site_name = site_name
-      token_response = JSON.parse(URI.parse("#{TOKEN_URL}?partner=#{site_id}").open.read)
+      token_response = JSON.parse(
+        RestClient.get(
+          TOKEN_URL,
+          params: {
+            partner: site_id,
+          }
+        )
+      )
       token = token_response['token']
       @site_info = token_response['population_settings']['collection_sites'][0]
-      @json = JSON.parse(URI.parse("#{APPOINTMENT_URL}?claim_token=#{token}&collection_site=#{@site_info['name']}").open.read)
+      @json = JSON.parse(
+        RestClient.get(
+          APPOINTMENT_URL,
+          params: {
+            claim_token: token,
+            collection_site: @site_info['name'],
+          }
+        )
+      )
       @storage = storage
       @logger = logger
     end

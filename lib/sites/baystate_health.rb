@@ -53,7 +53,7 @@ module BaystateHealth
           if h3[0].text.include?('Registration Temporarily Unavailable')
             logger.info '[BaystateHealth] Registration unavailable'
             return false
-          else
+          elsif html.search('ion-button').any? { |b| b.text.include?('Continue') }
             return true
           end
         else

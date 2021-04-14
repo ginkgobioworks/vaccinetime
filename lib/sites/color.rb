@@ -70,6 +70,12 @@ module Color
     end
   end
 
+  class WestSpringfield < Page
+    def site_id
+      'westspringfield'
+    end
+  end
+
   class Northampton < Page
     def site_id
       'northampton'
@@ -104,7 +110,11 @@ module Color
     end
   end
 
-  SITES = [LawrenceGeneral, Northampton].freeze
+  SITES = [
+    LawrenceGeneral,
+    Northampton,
+    WestSpringfield,
+  ].freeze
 
   def self.all_clinics(storage, logger)
     SITES.flat_map do |page_class|

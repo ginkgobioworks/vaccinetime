@@ -17,7 +17,7 @@ require_relative 'lib/sites/zocdoc'
 require_relative 'lib/sites/acuity'
 require_relative 'lib/sites/trinity_health'
 require_relative 'lib/sites/southcoast'
-require_relative 'lib/sites/northampton'
+#require_relative 'lib/sites/northampton'
 #require_relative 'lib/sites/rutland'
 require_relative 'lib/sites/heywood_healthcare'
 require_relative 'lib/sites/vaccinespotter'
@@ -40,7 +40,7 @@ SCRAPERS = {
   'acuity' => Acuity,
   'trinity_health' => TrinityHealth,
   'southcoast' => Southcoast,
-  'northampton' => Northampton,
+  #'northampton' => Northampton,
   #'rutland' => Rutland,
   'heywood_healthcare' => HeywoodHealthcare,
   'vaccinespotter' => Vaccinespotter,

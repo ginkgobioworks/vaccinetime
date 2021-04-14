@@ -146,10 +146,19 @@ module MyChart
     end
 
     def api_payload
-      {
-        'id' => '10033909,10033319,10033364,10033367,10033370,10033706,10033373',
-        'vt' => '2008',
-        'dept' => '10098252,10098245,10098242,10098243,10098244,10108801,10098241',
+      return @api_payload if @api_payload
+
+      settings = RestClient.get("https://mychartscheduling.bmc.org/MyChartscheduling/scripts/guest/covid19-screening/custom/settings.js?updateDt=#{Time.now.to_i}").body
+      iframe_src = %r{url: "(https://mychartscheduling\.bmc\.org/mychartscheduling/SignupAndSchedule/EmbeddedSchedule[^"]+)"}.match(settings)[1]
+
+      id = iframe_src.match(/id=([\d,]+)&/)[1]
+      dept = iframe_src.match(/dept=([\d,]+)&/)[1]
+      vt = iframe_src.match(/vt=(\d+)/)[1]
+
+      @api_payload = {
+        'id' => id,
+        'vt' => vt,
+        'dept' => dept,
         'view' => 'grouped',
         'start' => '',
         'filters' => {

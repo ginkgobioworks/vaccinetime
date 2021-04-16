@@ -5,7 +5,7 @@ require 'rest-client'
 require_relative './base_clinic'
 
 module Cvs
-  STATE = 'MA'
+  STATE = 'MA'.freeze
   USER_AGENTS = []
 
   class CvsCity
@@ -35,7 +35,7 @@ module Cvs
       cities_with_appointments = cvs_client.cities_with_appointments(logger)
       if cities_with_appointments.any?
         logger.info "[CVS] There are #{cities_with_appointments.length} cities with appointments"
-        logger.info "[CVS] Cities with appointments: #{cities_with_appointments.join(", ")}"
+        logger.info "[CVS] Cities with appointments: #{cities_with_appointments.join(', ')}"
       else
         logger.info "[CVS] No availability for any city in #{STATE}"
       end
@@ -43,7 +43,7 @@ module Cvs
       clinics = [StateClinic.new(storage, cities_with_appointments, STATE)]
     end
 
-    return clinics
+    clinics
   end
 
   class StateClinic < BaseClinic
@@ -52,13 +52,10 @@ module Cvs
     TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
     TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
-    attr_accessor :appointments
-
     def initialize(storage, cities, state)
       super(storage)
       @cities = cities.sort
       @state = state
-      @appointments = @cities.length
     end
 
     def title
@@ -78,7 +75,7 @@ module Cvs
     end
 
     def link
-      "https://www.cvs.com/immunizations/covid-19-vaccine"
+      'https://www.cvs.com/immunizations/covid-19-vaccine'
     end
 
     def sign_up_page
@@ -90,7 +87,7 @@ module Cvs
 
       tweet_cities = @cities
       cities_text = tweet_cities.shift
-      while (city = tweet_cities.shift) do
+      while (city = tweet_cities.shift)
         pending_text = ", #{city}"
         if cities_text.length + pending_text.length > 192
           tweet_groups << cities_text
@@ -123,11 +120,11 @@ module Cvs
     end
 
     def save_appointments
-      @storage.set(LAST_SEEN_CITIES_KEY + ':' + @state, @cities.join(','))
+      @storage.set("#{LAST_SEEN_CITIES_KEY}:#{@state}", @cities.join(','))
     end
 
     def last_cities
-      stored_value = @storage.get(LAST_SEEN_CITIES_KEY + ':' + @state)
+      stored_value = @storage.get("#{LAST_SEEN_CITIES_KEY}:#{@state}")
       stored_value.nil? ? [] : stored_value.split(',')
     end
 

@@ -13,7 +13,11 @@ module Vaccinespotter
       logger.info '[Vaccinespotter] Checking site'
       ma_stores.map do |brand, stores|
         logger.info "[Vaccinespotter] Found #{stores.length} #{brand} appointments"
-        Clinic.new(storage, brand, stores)
+        if stores.all? { |store| store['appointments'].length.positive? }
+          ClinicWithAppointments.new(storage, brand, stores)
+        else
+          Clinic.new(storage, brand, stores)
+        end
       end
     end
   end
@@ -128,6 +132,78 @@ module Vaccinespotter
 
       tweet_groups.map do |group|
         "#{title} appointments available in #{group}. Check eligibility and sign up at #{sign_up_page}"
+      end
+    end
+  end
+
+  class ClinicWithAppointments < BaseClinic
+    def initialize(storage, brand, stores)
+      super(storage)
+      @brand = brand
+      @stores = stores
+    end
+
+    def title
+      @brand
+    end
+
+    def cities
+      @stores.map { |store| store['city'] }.compact.uniq.sort
+    end
+
+    def appointments
+      @stores.map { |s| s['appointments'].length }.sum
+    end
+
+    def link
+      @stores.detect { |s| s['url'] }['url']
+    end
+
+    def slack_blocks
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Number of appointments:* #{appointments}\n*Link:* #{link}",
+        },
+      }
+    end
+
+    def twitter_text
+      tweet_groups = []
+
+      #   x chars: NUM_APPOINTMENTS
+      #   1 chars: " "
+      #   y chars: BRAND
+      #  27 chars: " appointments available in "
+      #   z chars: STORES
+      #  35 chars: ". Check eligibility and sign up at "
+      #  23 chars: shortened link
+      # ---------
+      # 280 chars total, 280 is the maximum
+      text_limit = 280 - (1 + title.length + 27 + 35 + 23)
+
+      tweet_stores = @stores.dup
+      first_store = tweet_stores.shift
+      cities_text = first_store['city']
+      group_appointments = first_store['appointments'].length
+
+      while (store = tweet_stores.shift)
+        pending_appts = group_appointments + store['appointments'].length
+        pending_text = ", #{store['city']}"
+        if pending_appts.to_s.length + cities_text.length + pending_text.length > text_limit
+          tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
+          cities_text = store['city']
+          group_appointments = store['appointments'].length
+        else
+          cities_text += pending_text
+          group_appointments += store['appointments'].length
+        end
+      end
+      tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
+
+      tweet_groups.map do |group|
+        "#{group[:group_appointments]} #{title} appointments available in #{group[:cities_text]}. Check eligibility and sign up at #{sign_up_page}"
       end
     end
   end

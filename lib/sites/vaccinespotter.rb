@@ -151,8 +151,16 @@ module Vaccinespotter
       @stores.map { |store| store['city'] }.compact.uniq.sort
     end
 
+    def stores_with_appointments
+      @stores.filter { |s| first_appointments(s).positive? }
+    end
+
     def appointments
-      @stores.map { |s| s['appointments'].length }.sum
+      @stores.map { |s| first_appointments(s) }.sum
+    end
+
+    def first_appointments(store)
+      store['appointments'].reject { |appt| appt['type'].include?('2nd Dose Only') }.length
     end
 
     def link
@@ -183,21 +191,21 @@ module Vaccinespotter
       # 280 chars total, 280 is the maximum
       text_limit = 280 - (1 + title.length + 27 + 35 + 23)
 
-      tweet_stores = @stores.dup
+      tweet_stores = stores_with_appointments
       first_store = tweet_stores.shift
       cities_text = first_store['city']
-      group_appointments = first_store['appointments'].length
+      group_appointments = first_appointments(first_store)
 
       while (store = tweet_stores.shift)
-        pending_appts = group_appointments + store['appointments'].length
+        pending_appts = group_appointments + first_appointments(store)
         pending_text = ", #{store['city']}"
         if pending_appts.to_s.length + cities_text.length + pending_text.length > text_limit
           tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
           cities_text = store['city']
-          group_appointments = store['appointments'].length
+          group_appointments = first_appointments(store)
         else
           cities_text += pending_text
-          group_appointments += store['appointments'].length
+          group_appointments = pending_appts
         end
       end
       tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }

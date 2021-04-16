@@ -140,7 +140,7 @@ module Vaccinespotter
     def initialize(storage, brand, stores)
       super(storage)
       @brand = brand
-      @stores = stores
+      @stores = stores.sort_by { |store| store['city'] }
     end
 
     def title
@@ -148,7 +148,7 @@ module Vaccinespotter
     end
 
     def cities
-      @stores.map { |store| store['city'] }.compact.uniq.sort
+      @stores.map { |store| store['city'] }.compact.uniq
     end
 
     def stores_with_appointments

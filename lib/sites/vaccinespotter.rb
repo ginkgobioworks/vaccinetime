@@ -24,7 +24,7 @@ module Vaccinespotter
       next unless properties
 
       brand = get_brand(properties['provider_brand_name'])
-      appointments_available = properties['appointments_available']
+      appointments_available = properties['appointments_available_all_doses']
       next unless brand && appointments_available && !IGNORE_BRANDS.include?(brand)
 
       h[brand] ||= []

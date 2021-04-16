@@ -32,6 +32,7 @@ The following websites are currently checked:
 * [Hannaford](https://hannafordsched.rxtouch.com/rbssched/program/covid19/Patient)
 * [Color](https://home.color.com) - Lawrence General Hospital
 * [Amesbury](https://www.amesburyma.gov/home/urgent-alerts/covid-19-vaccine-distribution)
+* [Holyoke Health](https://app.blockitnow.com/consumer/covid-holyoke/search?specialtyId=bf21b91b-f6f9-4a78-aca4-dbdedbe23a75&procedureId=468129ce-1d13-4114-92aa-78e2a3b04da5)
 
 ## Previously scraped websites
 

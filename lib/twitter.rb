@@ -41,6 +41,7 @@ class TwitterClient
     else
       @twitter.update(text)
     end
+  end
 
   rescue => e
     @logger.error "[TwitterClient] error: #{e}"
@@ -55,4 +56,3 @@ class TwitterClient
       clinic.save_tweet_time
     end
   end
-end

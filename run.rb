@@ -5,7 +5,7 @@ require_relative 'lib/multi_logger'
 require_relative 'lib/storage'
 require_relative 'lib/slack'
 require_relative 'lib/twitter'
-require_relative 'lib/discord'
+require_relative './lib/discord'
 
 # Sites
 require_relative 'lib/sites/ma_immunizations'

@@ -12,7 +12,7 @@ describe DiscordClient do
       expect(FakeDiscord).to receive(:new).and_return(mock_discord)
       expect(mock_discord).to receive(:update).with('test message')
       expect(mock_clinic).to receive(:discord_text).and_return('test message')
-      discord.message(mock_clinic)
+      discord.send(mock_clinic)
     end
   end
 

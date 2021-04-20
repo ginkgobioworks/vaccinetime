@@ -15,10 +15,7 @@ class DiscordClient
   def initialize(logger)
     @logger = logger
     @discord = if ENV['ENVIRONMENT'] != 'test' && env_keys_exist?
-                 Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK_URL'].freeze)
-               end
-               else
-                 FakeDiscord.new(logger)
+                 Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK_URL']).freeze
                end
   end
 
@@ -33,14 +30,12 @@ class DiscordClient
       text.each { |t| @discord.execute do |builder|
                     builder.content = text 
                   end
-                end
                 }
-    else
-      @discord.execute do |builder|
-        builder.content = text 
-        end
-      end
-    end
+              end
+              @discord.execute do |builder|
+                builder.content = text 
+              end
+  end
 
   rescue => e
     @logger.error "[DiscordClient] error: #{e}"

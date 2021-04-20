@@ -13,6 +13,7 @@ module Amesbury
       sites = res.scan(%r{https://www\.(maimmunizations\.org/+reg/\d+)})
       if sites.empty?
         logger.info '[Amesbury] No sites found'
+        []
       else
         logger.info "[Amesbury] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(

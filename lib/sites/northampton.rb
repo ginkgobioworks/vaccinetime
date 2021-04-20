@@ -13,6 +13,7 @@ module Northampton
       sites = res.scan(%r{https://www\.(maimmunizations\.org//reg/\d+)})
       if sites.empty?
         logger.info '[Northampton] No sites found'
+        []
       else
         logger.info "[Northampton] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(

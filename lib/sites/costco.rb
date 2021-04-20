@@ -5,39 +5,60 @@ require_relative '../sentry_helper'
 require_relative './base_clinic'
 
 module Costco
-  BASE_API_URL = 'https://book.appointment-plus.com/book-appointment'.freeze
-  LOCATION_URL = "#{BASE_API_URL}/get-clients".freeze
-  EMPLOYEE_URL = "#{BASE_API_URL}/get-employees".freeze
-  SERVICES_URL = "#{BASE_API_URL}/get-services".freeze
-  APPOINTMENT_URL = "#{BASE_API_URL}/get-grid-hours".freeze
+  BASE_API_URL = 'https://book-costcopharmacy.appointment-plus.com'.freeze
+  BOOKING_ID = 'd133yng2'.freeze
+  PREFERENCES_URL = "#{BASE_API_URL}/get-preferences".freeze
+  LOCATION_URL = "#{BASE_API_URL}/book-appointment/get-clients".freeze
+  EMPLOYEE_URL = "#{BASE_API_URL}/book-appointment/get-employees".freeze
+  SERVICES_URL = "#{BASE_API_URL}/book-appointment/get-services".freeze
+  APPOINTMENT_URL = "#{BASE_API_URL}/book-appointment/get-grid-hours".freeze
 
   def self.all_clinics(storage, logger)
     logger.info '[Costco] Checking site'
 
     SentryHelper.catch_errors(logger, 'Costco') do
-      cities = get_locations['clientObjects'].filter do |client|
-        client['state'] == 'MA' &&
-          client['displayToCustomer'] == true &&
-          has_appointments?(client['id'], client['clientMasterId'])
+      appointments = get_locations['clientObjects'].filter do |client|
+        client['displayToCustomer'] == true
       end.map do |client|
-        client['locationName'].gsub('Costco', '').strip
-      end.sort
+        {
+          location: client['locationName'].gsub('Costco', '').strip,
+          appointments: get_city_appointments(client['id'], client['clientMasterId']),
+        }
+      end.filter do |client|
+        client[:appointments].positive?
+      end
 
-      logger.info "[Costco] Found appointments in #{cities.join(', ')}" if cities.any?
-      [Clinic.new(storage, cities)]
+      logger.info "[Costco] Found #{appointments.map { |a| a[:appointments] }.sum} appointments in #{appointments.map { |a| a[:location] }.join(', ')}" if appointments.any?
+      [Clinic.new(storage, appointments)]
     end
   end
 
-  def self.has_appointments?(client_id, client_master_id)
+  def self.get_city_appointments(client_id, client_master_id)
     employees = get_employees(client_id, client_master_id)
-    return false unless employees['employeeObjects'].any?
+    return 0 unless employees['employeeObjects'].any?
 
     employee_id = employees['employeeObjects'][0]['id']
     services = get_services(client_id, client_master_id, employee_id)
-    return false unless services.any?
+    return 0 unless services.any?
 
     appointments = get_appointments(client_master_id, employee_id, services)
-    appointments['data']['gridHours'].any?
+    appointments['data']['gridHours'].map do |_date, obj|
+      obj['timeSlots']['numberOfSpots'].zip(obj['timeSlots']['numberOfSpotsTaken']).map { |a, b| a - b }.sum
+    end.sum
+  end
+
+  def self.get_master_id
+    JSON.parse(
+      RestClient.get(
+        PREFERENCES_URL,
+        params: {
+          clientMasterId: '',
+          clientId: '',
+          bookingId: BOOKING_ID,
+          '_' => Time.now.to_i,
+        }
+      ).body
+    )['data']['clientmasterId']
   end
 
   def self.get_locations
@@ -45,7 +66,7 @@ module Costco
       RestClient.get(
         LOCATION_URL,
         params: {
-          clientMasterId: 426227,
+          clientMasterId: get_master_id,
           pageNumber: 1,
           itemsPerPage: 10,
           keyword: '01545',
@@ -120,16 +141,9 @@ module Costco
   end
 
   class Clinic < BaseClinic
-    LAST_SEEN_STORAGE_PREFIX = 'costco-last-cities'.freeze
-    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
-    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
-
-    attr_reader :cities
-
-    def initialize(storage, cities)
+    def initialize(storage, appointment_data)
       super(storage)
-      @cities = cities
+      @appointment_data = appointment_data.sort_by { |client| client[:location] }
     end
 
     def title
@@ -137,32 +151,15 @@ module Costco
     end
 
     def link
-      'https://book.appointment-plus.com/d133yng2'
+      'https://www.costco.com/covid-vaccine.html'
     end
 
     def appointments
-      cities.length
+      @appointment_data.map { |a| a[:appointments] }.sum
     end
 
-    def storage_key
-      "#{LAST_SEEN_STORAGE_PREFIX}:Costco"
-    end
-
-    def save_appointments
-      @storage.set(storage_key, cities.to_json)
-    end
-
-    def last_cities
-      stored_value = @storage.get(storage_key)
-      stored_value.nil? ? [] : JSON.parse(stored_value)
-    end
-
-    def new_cities
-      cities - last_cities
-    end
-
-    def new_appointments
-      new_cities.length
+    def cities
+      @appointment_data.map { |a| a[:location] }
     end
 
     def slack_blocks
@@ -170,7 +167,7 @@ module Costco
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Number of appointments:*#{appointments}\n*Link:* #{link}",
         },
       }
     end
@@ -178,28 +175,38 @@ module Costco
     def twitter_text
       tweet_groups = []
 
+      #   x chars: NUM_APPOINTMENTS
+      #   1 chars: " "
+      #   y chars: BRAND
       #  27 chars: " appointments available in "
+      #   z chars: STORES
       #  35 chars: ". Check eligibility and sign up at "
       #  23 chars: shortened link
       # ---------
       # 280 chars total, 280 is the maximum
-      text_limit = 280 - (title.length + 27 + 35 + 23)
+      text_limit = 280 - (1 + title.length + 27 + 35 + 23)
 
-      tweet_cities = cities
-      cities_text = tweet_cities.shift
-      while (city = tweet_cities.shift)
-        pending_text = ", #{city}"
-        if cities_text.length + pending_text.length > text_limit
-          tweet_groups << cities_text
-          cities_text = city
+      tweet_stores = @appointment_data.dup
+      first_store = tweet_stores.shift
+      cities_text = first_store[:location]
+      group_appointments = first_store[:appointments]
+
+      while (store = tweet_stores.shift)
+        pending_appts = group_appointments + store[:appointments]
+        pending_text = ", #{store[:location]}"
+        if pending_appts.to_s.length + cities_text.length + pending_text.length > text_limit
+          tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
+          cities_text = store[:location]
+          group_appointments = store[:appointments]
         else
           cities_text += pending_text
+          group_appointments = pending_appts
         end
       end
-      tweet_groups << cities_text
+      tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
 
       tweet_groups.map do |group|
-        "#{title} appointments available in #{group}. Check eligibility and sign up at #{sign_up_page}"
+        "#{group[:group_appointments]} #{title} appointments available in #{group[:cities_text]}. Check eligibility and sign up at #{sign_up_page}"
       end
     end
   end

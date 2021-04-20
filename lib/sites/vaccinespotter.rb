@@ -12,14 +12,19 @@ module Vaccinespotter
     SentryHelper.catch_errors(logger, 'Vaccinespotter') do
       logger.info '[Vaccinespotter] Checking site'
       ma_stores.map do |brand, stores|
-        logger.info "[Vaccinespotter] Found #{stores.length} #{brand} appointments"
         if stores.all? { |store| store['appointments'].length.positive? }
+          logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with #{stores.map { |s| first_appointments(s) }.sum} appointments"
           ClinicWithAppointments.new(storage, brand, stores)
         else
+          logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with appointments"
           Clinic.new(storage, brand, stores)
         end
       end
     end
+  end
+
+  def self.first_appointments(store)
+    store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.length
   end
 
   def self.ma_stores
@@ -160,7 +165,7 @@ module Vaccinespotter
     end
 
     def first_appointments(store)
-      store['appointments'].reject { |appt| appt['type'].include?('2nd Dose Only') }.length
+      Vaccinespotter.first_appointments(store)
     end
 
     def link

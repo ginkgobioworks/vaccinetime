@@ -167,7 +167,7 @@ module Costco
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Number of appointments:*#{appointments}\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Number of appointments:* #{appointments}\n*Link:* #{link}",
         },
       }
     end

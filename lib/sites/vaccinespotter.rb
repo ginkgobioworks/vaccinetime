@@ -2,7 +2,7 @@ require 'rest-client'
 require 'json'
 
 require_relative '../sentry_helper'
-require_relative './base_clinic'
+require_relative './pharmacy_clinic'
 
 module Vaccinespotter
   API_URL = 'https://www.vaccinespotter.org/api/v0/states/MA.json'.freeze
@@ -55,11 +55,8 @@ module Vaccinespotter
     JSON.parse(RestClient.get(API_URL).body)
   end
 
-  class Clinic < BaseClinic
+  class Clinic < PharmacyClinic
     LAST_SEEN_STORAGE_PREFIX = 'vaccinespotter-last-cities'.freeze
-    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
-    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     def initialize(storage, brand, stores)
       super(storage)

@@ -2,6 +2,9 @@ require 'date'
 
 require_relative '../lib/sites/base_clinic'
 
+class TestClinic < BaseClinic
+end
+
 describe BaseClinic do
   let(:redis) { double('Redis') }
   let(:storage) { Storage.new(redis) }
@@ -82,7 +85,7 @@ describe BaseClinic do
       expect(clinic.has_not_posted_recently?).to be true
     end
 
-    it 'returns false if there is a post in the last 10 minutes' do
+    it 'returns false if there is a post in the last 30 minutes' do
       clinic = BaseClinic.new(storage)
       expect(storage).to receive(:get_post_time).with(clinic).and_return((Time.now - 5 * 60).to_s)
       expect(clinic.has_not_posted_recently?).to be false
@@ -133,6 +136,18 @@ describe BaseClinic do
       allow(storage).to receive(:get_appointments).and_return(0)
       allow(storage).to receive(:get_post_time).and_return((Time.now - 60).to_s)
       expect(clinic.should_tweet?).to be false
+    end
+  end
+
+  describe '#module_prefix' do
+    it 'returns the class name in all caps' do
+      clinic = BaseClinic.new(storage)
+      expect(clinic.module_prefix).to eq('BASE_CLINIC')
+    end
+
+    it 'works with subclasses' do
+      clinic = TestClinic.new(storage)
+      expect(clinic.module_prefix).to eq('TEST_CLINIC')
     end
   end
 end

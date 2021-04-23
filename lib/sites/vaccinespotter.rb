@@ -6,7 +6,7 @@ require_relative './base_clinic'
 
 module Vaccinespotter
   API_URL = 'https://www.vaccinespotter.org/api/v0/states/MA.json'.freeze
-  IGNORE_BRANDS = ['CVS', 'Costco', 'Hannaford'].freeze
+  IGNORE_BRANDS = ['cvs', 'costco', 'hannaford', 'maimmunizations'].freeze
 
   def self.all_clinics(storage, logger)
     SentryHelper.catch_errors(logger, 'Vaccinespotter') do
@@ -30,11 +30,13 @@ module Vaccinespotter
   def self.ma_stores
     ma_data['features'].each_with_object({}) do |feature, h|
       properties = feature['properties']
-      next unless properties
+      next unless properties && properties['provider']
+
+      next if IGNORE_BRANDS.include?(properties['provider'])
 
       brand = get_brand(properties['provider_brand_name'])
       appointments_available = properties['appointments_available_all_doses']
-      next unless brand && appointments_available && !IGNORE_BRANDS.include?(brand)
+      next unless brand && appointments_available
 
       h[brand] ||= []
       h[brand] << properties

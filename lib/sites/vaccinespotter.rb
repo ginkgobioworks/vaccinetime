@@ -13,7 +13,7 @@ module Vaccinespotter
       logger.info '[Vaccinespotter] Checking site'
       ma_stores.map do |brand, stores|
         if stores.all? { |store| store['appointments'].length.positive? }
-          logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with #{stores.map { |s| first_appointments(s) }.sum} appointments"
+          logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with #{first_appointments(stores)} appointments"
           ClinicWithAppointments.new(storage, brand, stores)
         else
           logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with appointments"
@@ -23,8 +23,10 @@ module Vaccinespotter
     end
   end
 
-  def self.first_appointments(store)
-    store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.length
+  def self.first_appointments(stores)
+    stores.map do |store|
+      store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.length
+    end.sum
   end
 
   def self.ma_stores
@@ -157,11 +159,11 @@ module Vaccinespotter
     end
 
     def stores_with_appointments
-      @stores.filter { |s| first_appointments(s).positive? }
+      @stores.filter { |s| first_appointments([s]).positive? }
     end
 
     def appointments
-      @stores.map { |s| first_appointments(s) }.sum
+      first_appointments(@stores)
     end
 
     def first_appointments(store)
@@ -196,18 +198,18 @@ module Vaccinespotter
       # 280 chars total, 280 is the maximum
       text_limit = 280 - (1 + title.length + 27 + 35 + 23)
 
-      tweet_stores = stores_with_appointments
-      first_store = tweet_stores.shift
-      cities_text = first_store['city']
-      group_appointments = first_appointments(first_store)
+      tweet_stores = stores_with_appointments.group_by { |s| s['city'] }.to_a
+      first_city, first_stores = tweet_stores.shift
+      cities_text = first_city
+      group_appointments = first_appointments(first_stores)
 
-      while (store = tweet_stores.shift)
-        pending_appts = group_appointments + first_appointments(store)
-        pending_text = ", #{store['city']}"
+      while (city, stores = tweet_stores.shift)
+        pending_appts = group_appointments + first_appointments(stores)
+        pending_text = ", #{city}"
         if pending_appts.to_s.length + cities_text.length + pending_text.length > text_limit
           tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
-          cities_text = store['city']
-          group_appointments = first_appointments(store)
+          cities_text = city
+          group_appointments = first_appointments(stores)
         else
           cities_text += pending_text
           group_appointments = pending_appts

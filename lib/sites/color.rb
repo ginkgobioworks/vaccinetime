@@ -150,6 +150,10 @@ module Color
       "#{name} on #{date}"
     end
 
+    def city
+      @site_info['address']['city']
+    end
+
     def address
       addr = @site_info['address']['line1']
       addr += @site_info['address']['line2'] unless @site_info['address']['line2'].empty?
@@ -164,6 +168,10 @@ module Color
           text: "*#{title}*\n*Address:* #{address}\n*Available appointments:* #{render_slack_appointments}\n*Link:* #{link}",
         },
       }
+    end
+
+    def twitter_text
+      "#{appointments} appointments available at #{name} in #{city}, MA on #{date}. Check eligibility and sign up at #{sign_up_page}"
     end
   end
 end

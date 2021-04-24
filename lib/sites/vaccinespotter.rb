@@ -11,10 +11,13 @@ module Vaccinespotter
   def self.all_clinics(storage, logger)
     SentryHelper.catch_errors(logger, 'Vaccinespotter') do
       logger.info '[Vaccinespotter] Checking site'
-      ma_stores.map do |brand, stores|
+      ma_stores.flat_map do |brand, stores|
         if stores.all? { |store| store['appointments'].length.positive? }
-          logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with #{first_appointments(stores)} appointments"
-          ClinicWithAppointments.new(storage, brand, stores)
+          link = stores.detect { |s| s['url'] }['url']
+          group_stores_by_date(stores).map do |date, appts|
+            logger.info "[Vaccinespotter] Found #{appts.keys.length} #{brand} stores with #{appts.values.sum} appointments on #{date}"
+            ClinicWithAppointments.new(storage, brand, date, appts, link)
+          end
         else
           logger.info "[Vaccinespotter] Found #{stores.length} #{brand} stores with appointments"
           Clinic.new(storage, brand, stores)
@@ -23,10 +26,14 @@ module Vaccinespotter
     end
   end
 
-  def self.first_appointments(stores)
-    stores.map do |store|
-      store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.length
-    end.sum
+  def self.group_stores_by_date(stores)
+    stores.each_with_object({}) do |store, h|
+      store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.each do |appt|
+        date = Date.parse(appt['time'])
+        h[date] ||= Hash.new(0)
+        h[date][store['city']] += 1
+      end
+    end
   end
 
   def self.ma_stores
@@ -145,10 +152,14 @@ module Vaccinespotter
   end
 
   class ClinicWithAppointments < BaseClinic
-    def initialize(storage, brand, stores)
+    attr_reader :date, :link
+
+    def initialize(storage, brand, date, appts, link)
       super(storage)
       @brand = brand
-      @stores = stores.sort_by { |store| store['city'] }
+      @date = date
+      @appts_by_store = appts
+      @link = link
     end
 
     def module_name
@@ -156,27 +167,15 @@ module Vaccinespotter
     end
 
     def title
-      @brand
+      "#{@brand} on #{@date}"
     end
 
     def cities
-      @stores.map { |store| store['city'] }.compact.uniq
-    end
-
-    def stores_with_appointments
-      @stores.filter { |s| first_appointments([s]).positive? }
+      @appts_by_store.keys.sort
     end
 
     def appointments
-      first_appointments(@stores)
-    end
-
-    def first_appointments(store)
-      Vaccinespotter.first_appointments(store)
-    end
-
-    def link
-      @stores.detect { |s| s['url'] }['url']
+      @appts_by_store.values.sum
     end
 
     def slack_blocks
@@ -184,37 +183,40 @@ module Vaccinespotter
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Number of appointments:* #{appointments}\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{cities.join(', ')}\n*Date:* #{@date}\n*Number of appointments:* #{appointments}\n*Link:* #{link}",
         },
       }
     end
 
     def twitter_text
+      date_text = @date.strftime('%-m/%d')
       tweet_groups = []
 
       #   x chars: NUM_APPOINTMENTS
-      #   1 chars: " "
+      #  27 chars: " appointments available at "
       #   y chars: BRAND
-      #  27 chars: " appointments available in "
-      #   z chars: STORES
+      #   4 chars: " on "
+      #   z chars: DATE
+      #   4 chars: " in "
+      #   w chars: STORES
       #  35 chars: ". Check eligibility and sign up at "
       #  23 chars: shortened link
       # ---------
       # 280 chars total, 280 is the maximum
-      text_limit = 280 - (1 + title.length + 27 + 35 + 23)
+      text_limit = 280 - (27 + @brand.length + 4 + date_text.length + 4 + 35 + 23)
 
-      tweet_stores = stores_with_appointments.group_by { |s| s['city'] }.to_a
-      first_city, first_stores = tweet_stores.shift
+      tweet_stores = cities.dup
+      first_city = tweet_stores.shift
       cities_text = first_city
-      group_appointments = first_appointments(first_stores)
+      group_appointments = @appts_by_store[first_city]
 
-      while (city, stores = tweet_stores.shift)
-        pending_appts = group_appointments + first_appointments(stores)
+      while (city = tweet_stores.shift)
+        pending_appts = group_appointments + @appts_by_store[city]
         pending_text = ", #{city}"
         if pending_appts.to_s.length + cities_text.length + pending_text.length > text_limit
           tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
           cities_text = city
-          group_appointments = first_appointments(stores)
+          group_appointments = @appts_by_store[city]
         else
           cities_text += pending_text
           group_appointments = pending_appts
@@ -223,7 +225,7 @@ module Vaccinespotter
       tweet_groups << { cities_text: cities_text, group_appointments: group_appointments }
 
       tweet_groups.map do |group|
-        "#{group[:group_appointments]} #{title} appointments available in #{group[:cities_text]}. Check eligibility and sign up at #{sign_up_page}"
+        "#{group[:group_appointments]} appointments available at #{@brand} on #{date_text} in #{group[:cities_text]}. Check eligibility and sign up at #{sign_up_page}"
       end
     end
   end

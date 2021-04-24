@@ -1,13 +1,13 @@
 require 'date'
 
 class BaseClinic
-  TWEET_THRESHOLD = 10 # minimum number to post
-  TWEET_INCREASE_NEEDED = 5
-  TWEET_COOLDOWN = 600 # 10 minutes
+  TWEET_THRESHOLD = 20 # minimum number to post
+  TWEET_INCREASE_NEEDED = 10
+  TWEET_COOLDOWN = 30 * 60 # 30 minutes
 
   # Pharmacies treat 1 store = 1 appointment, so the thresholds are lower
-  PHARMACY_TWEET_THRESHOLD = 5
-  PHARMACY_TWEET_INCREASE_NEEDED = 2
+  PHARMACY_TWEET_THRESHOLD = 10
+  PHARMACY_TWEET_INCREASE_NEEDED = 5
 
   def initialize(storage)
     @storage = storage

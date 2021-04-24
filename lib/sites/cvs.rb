@@ -50,7 +50,7 @@ module Cvs
     LAST_SEEN_CITIES_KEY = 'cvs-last-cities'.freeze
     TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
     TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
+    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || (60 * 60)
 
     def initialize(storage, cities, state)
       super(storage)

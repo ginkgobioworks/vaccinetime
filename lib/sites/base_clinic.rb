@@ -1,13 +1,9 @@
 require 'date'
 
 class BaseClinic
-  TWEET_THRESHOLD = 20 # minimum number to post
-  TWEET_INCREASE_NEEDED = 10
-  TWEET_COOLDOWN = 30 * 60 # 30 minutes
-
-  # Pharmacies treat 1 store = 1 appointment, so the thresholds are lower
-  PHARMACY_TWEET_THRESHOLD = 10
-  PHARMACY_TWEET_INCREASE_NEEDED = 5
+  DEFAULT_TWEET_THRESHOLD = 20 # minimum number to post
+  DEFAULT_TWEET_INCREASE_NEEDED = 10
+  DEFAULT_TWEET_COOLDOWN = 30 * 60 # 30 minutes
 
   def initialize(storage)
     @storage = storage
@@ -60,14 +56,30 @@ class BaseClinic
     }
   end
 
+  def module_name
+    'DEFAULT'
+  end
+
+  def tweet_threshold
+    ENV["#{module_name}_TWEET_THRESHOLD"]&.to_i || self.class::DEFAULT_TWEET_THRESHOLD
+  end
+
+  def tweet_cooldown
+    ENV["#{module_name}_TWEET_COOLDOWN"]&.to_i || self.class::DEFAULT_TWEET_COOLDOWN
+  end
+
+  def tweet_increase_needed
+    ENV["#{module_name}_TWEET_INCREASE_NEEDED"]&.to_i || self.class::DEFAULT_TWEET_INCREASE_NEEDED
+  end
+
   def has_not_posted_recently?
-    (Time.now - last_posted_time) > self.class::TWEET_COOLDOWN # 10 minutes
+    (Time.now - last_posted_time) > tweet_cooldown
   end
 
   def should_tweet?
     !link.nil? &&
-      appointments >= self.class::TWEET_THRESHOLD &&
-      new_appointments >= self.class::TWEET_INCREASE_NEEDED &&
+      appointments >= tweet_threshold &&
+      new_appointments >= tweet_increase_needed &&
       has_not_posted_recently?
   end
 

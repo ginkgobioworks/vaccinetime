@@ -2,7 +2,7 @@ require 'date'
 require 'json'
 require 'rest-client'
 
-require_relative './base_clinic'
+require_relative './pharmacy_clinic'
 
 module Cvs
   STATE = 'MA'.freeze
@@ -46,11 +46,8 @@ module Cvs
     clinics
   end
 
-  class StateClinic < BaseClinic
+  class StateClinic < PharmacyClinic
     LAST_SEEN_CITIES_KEY = 'cvs-last-cities'.freeze
-    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
-    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || (60 * 60)
 
     def initialize(storage, cities, state)
       super(storage)
@@ -141,6 +138,10 @@ module Cvs
       @user_agent = @user_agents.sample
       @state = state
       @state_status_url = "https://www.cvs.com/immunizations/covid-19-vaccine.vaccine-status.#{state}.json?vaccineinfo".freeze
+    end
+
+    def module_name
+      'CVS'
     end
 
     def init_session(logger)

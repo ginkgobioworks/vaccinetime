@@ -141,6 +141,10 @@ module Zocdoc
       @location = location
     end
 
+    def module_name
+      'ZOCDOC'
+    end
+
     def city
       @location['city']
     end

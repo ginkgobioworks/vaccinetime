@@ -90,6 +90,10 @@ module Southcoast
       @appointments = appointments
     end
 
+    def module_name
+      'SOUTHCOAST'
+    end
+
     def title
       "Southcoast Health in #{@site}, MA on #{date}"
     end

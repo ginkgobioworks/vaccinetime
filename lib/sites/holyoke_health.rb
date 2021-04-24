@@ -144,6 +144,10 @@ module HolyokeHealth
       @appointments = appointments
     end
 
+    def module_name
+      'HOLYOKE_HEALTH'
+    end
+
     def title
       "#{location} on #{date}"
     end

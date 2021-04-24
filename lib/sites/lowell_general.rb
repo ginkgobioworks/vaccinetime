@@ -106,6 +106,10 @@ module LowellGeneral
       @appointments = appointments
     end
 
+    def module_name
+      'LOWELL_GENERAL'
+    end
+
     def title
       "#{name} on #{date}"
     end

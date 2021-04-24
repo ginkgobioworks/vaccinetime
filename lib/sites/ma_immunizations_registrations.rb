@@ -4,7 +4,7 @@ require 'nokogiri'
 require_relative './base_clinic'
 
 module MaImmunizationsRegistrations
-  def self.all_clinics(sign_up_page, pages, storage, logger, log_module, additional_info = nil)
+  def self.all_clinics(module_name, sign_up_page, pages, storage, logger, log_module, additional_info = nil)
     pages.each_with_object(Hash.new(0)) do |clinic_url, h|
       sleep(1)
       scrape_result = scrape_registration_site(logger, log_module, clinic_url)
@@ -12,7 +12,7 @@ module MaImmunizationsRegistrations
 
       h[[scrape_result[0], scrape_result[1]]] += scrape_result[2]
     end.map do |(title, vaccine), appointments|
-      Clinic.new(storage, title, sign_up_page, appointments, vaccine, additional_info)
+      Clinic.new(module_name, storage, title, sign_up_page, appointments, vaccine, additional_info)
     end
   end
 
@@ -63,13 +63,14 @@ module MaImmunizationsRegistrations
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
-    TWEET_INCREASE_NEEDED = 50
-    TWEET_COOLDOWN = 3600 # 1 hour
+    DEFAULT_TWEET_INCREASE_NEEDED = 50
+    DEFAULT_TWEET_COOLDOWN = 3600 # 1 hour
 
-    attr_reader :title, :link, :appointments, :vaccine
+    attr_reader :module_name, :title, :link, :appointments, :vaccine
 
-    def initialize(storage, title, link, appointments, vaccine, additional_info)
+    def initialize(mod_name, storage, title, link, appointments, vaccine, additional_info)
       super(storage)
+      @module_name = mod_name
       @title = title
       @link = link
       @appointments = appointments

@@ -75,6 +75,10 @@ module BaystateHealth
       @vaccines = Set.new
     end
 
+    def module_name
+      'BAYSTATE_HEALTH'
+    end
+
     def title
       'Baystate Health'
     end

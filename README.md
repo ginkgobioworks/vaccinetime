@@ -109,20 +109,13 @@ Additional configuration can be done with the following:
 
 ### Site specific configuration
 
-There are also some site specific configurations to allow for tweaking behavior
-at runtime without having to change the code:
-
-MaImmunizations configuration:
+All modules allow for site specific configuration by setting environment
+variables based on the module name. For example, to set MaImmunizations
+configuration, use:
 
 * MA_IMMUNIZATIONS_TWEET_THRESHOLD
 * MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED
 * MA_IMMUNIZATIONS_TWEET_COOLDOWN
-
-CVS and Vaccinespotter configuration:
-
-* PHARMACY_TWEET_THRESHOLD
-* PHARMACY_TWEET_INCREASE_NEEDED
-* PHARMACY_TWEET_COOLDOWN
 
 ## Contributing
 

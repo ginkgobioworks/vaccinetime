@@ -91,6 +91,10 @@ module Curative
       @appointments = appointments
     end
 
+    def module_name
+      'CURATIVE'
+    end
+
     def name
       @json['name']
     end

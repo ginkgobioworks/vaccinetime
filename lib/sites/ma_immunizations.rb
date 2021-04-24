@@ -140,9 +140,6 @@ module MaImmunizations
 
   class Clinic < BaseClinic
     TITLE_MATCHER = %r[^(.+) on (\d{2}/\d{2}/\d{4})$].freeze
-    TWEET_THRESHOLD = ENV['MA_IMMUNIZATIONS_TWEET_THRESHOLD']&.to_i || BaseClinic::TWEET_THRESHOLD
-    TWEET_INCREASE_NEEDED = ENV['MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['MA_IMMUNIZATIONS_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     attr_accessor :appointments, :vaccines
 
@@ -161,6 +158,10 @@ module MaImmunizations
       if @appointments.positive? && @parsed_info['Vaccinations offered']
         @vaccines.add(@parsed_info['Vaccinations offered'])
       end
+    end
+
+    def module_name
+      'MA_IMMUNIZATIONS'
     end
 
     def valid?

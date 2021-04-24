@@ -138,6 +138,10 @@ module Color
       @link = link
     end
 
+    def module_name
+      'COLOR'
+    end
+
     def name
       @site_info['name']
     end

@@ -56,6 +56,10 @@ module TrinityHealth
       @appointments = appointments
     end
 
+    def module_name
+      'TRINITY_HEALTH'
+    end
+
     def title
       "#{NAME} on #{date}"
     end

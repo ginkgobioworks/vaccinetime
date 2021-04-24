@@ -1,8 +1,9 @@
 require 'rest-client'
 require 'nokogiri'
 
+require_relative '../user_agents'
 require_relative '../sentry_helper'
-require_relative './base_clinic'
+require_relative './pharmacy_clinic'
 
 module Rxtouch
   class Page
@@ -44,7 +45,7 @@ module Rxtouch
     def fetch_cookies
       cookies = {}
       12.times do
-        res = RestClient.get(sign_up_url, cookies: cookies)
+        res = RestClient.get(sign_up_url, cookies: cookies, user_agent: UserAgents.random)
         cookies = res.cookies
         return [true, cookies] unless res.request.url.include?('queue-it.net')
 
@@ -147,11 +148,8 @@ module Rxtouch
     end
   end
 
-  class Clinic < BaseClinic
+  class Clinic < PharmacyClinic
     LAST_SEEN_STORAGE_PREFIX = 'rxtouch-last-cities'.freeze
-    TWEET_THRESHOLD = ENV['PHARMACY_TWEET_THRESHOLD']&.to_i || BaseClinic::PHARMACY_TWEET_THRESHOLD
-    TWEET_INCREASE_NEEDED = ENV['PHARMACY_TWEET_INCREASE_NEEDED']&.to_i || BaseClinic::PHARMACY_TWEET_INCREASE_NEEDED
-    TWEET_COOLDOWN = ENV['PHARMACY_TWEET_COOLDOWN']&.to_i || BaseClinic::TWEET_COOLDOWN
 
     attr_reader :cities, :link
 
@@ -160,6 +158,10 @@ module Rxtouch
       @brand = brand
       @cities = cities
       @link = link
+    end
+
+    def module_name
+      'RXTOUCH'
     end
 
     def title
@@ -231,7 +233,7 @@ module Rxtouch
   end
 
   ALL_SITES = [
-    #StopAndShop,
+    StopAndShop,
     Hannaford,
   ].freeze
 

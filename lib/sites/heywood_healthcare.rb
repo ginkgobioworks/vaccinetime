@@ -70,6 +70,10 @@ module HeywoodHealthcare
       @link = link
     end
 
+    def module_name
+      'HEYWOOD_HEALTHCARE'
+    end
+
     def title
       "#{name} on #{date}"
     end

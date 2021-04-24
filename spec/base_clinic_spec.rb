@@ -76,9 +76,9 @@ describe BaseClinic do
       expect(clinic.has_not_posted_recently?).to be true
     end
 
-    it 'returns true if no posts in the last 10 minutes' do
+    it 'returns true if no posts in the last 30 minutes' do
       clinic = BaseClinic.new(storage)
-      allow(storage).to receive(:get_post_time).with(clinic).and_return((Time.now - 20 * 60).to_s)
+      allow(storage).to receive(:get_post_time).with(clinic).and_return((Time.now - 40 * 60).to_s)
       expect(clinic.has_not_posted_recently?).to be true
     end
 

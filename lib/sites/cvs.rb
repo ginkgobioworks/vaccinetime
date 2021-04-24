@@ -75,10 +75,6 @@ module Cvs
       'https://www.cvs.com/immunizations/covid-19-vaccine'
     end
 
-    def sign_up_page
-      link
-    end
-
     def twitter_text
       tweet_groups = []
 

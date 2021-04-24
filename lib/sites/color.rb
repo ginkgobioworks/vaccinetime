@@ -165,9 +165,5 @@ module Color
         },
       }
     end
-
-    def sign_up_page
-      link
-    end
   end
 end

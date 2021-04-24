@@ -87,10 +87,6 @@ module BaystateHealth
       SIGN_UP_URL
     end
 
-    def sign_up_page
-      link
-    end
-
     def twitter_text
       txt = "#{appointments} appointments available at #{title} (in #{locations.join('/')})"
       txt += " for #{vaccines.join(', ')}" if vaccines.any?

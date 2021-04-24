@@ -159,10 +159,6 @@ module Zocdoc
       "#{name} in #{city}, MA on #{date}"
     end
 
-    def sign_up_page
-      link
-    end
-
     def slack_blocks
       {
         type: 'section',

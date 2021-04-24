@@ -117,10 +117,6 @@ module Curative
       "https://curative.com/sites/#{@site_num}"
     end
 
-    def sign_up_page
-      link
-    end
-
     def slack_blocks
       {
         type: 'section',

@@ -394,6 +394,10 @@ module MyChart
       @storage_key_prefix = storage_key_prefix
     end
 
+    def module_name
+      'MY_CHART'
+    end
+
     def name
       @department['Name']
     end

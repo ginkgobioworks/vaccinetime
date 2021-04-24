@@ -160,6 +160,10 @@ module MaImmunizations
       end
     end
 
+    def module_name
+      'MA_IMMUNIZATIONS'
+    end
+
     def valid?
       @parsed_info.key?('Available Appointments')
     end

@@ -17,6 +17,7 @@ module Northampton
       else
         logger.info "[Northampton] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(
+          'NORTHAMPTON',
           BASE_URL,
           sites.map { |clinic_url| "https://registrations.#{clinic_url[0]}" },
           storage,

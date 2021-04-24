@@ -138,16 +138,4 @@ describe BaseClinic do
       expect(clinic.should_tweet?).to be false
     end
   end
-
-  describe '#module_prefix' do
-    it 'returns the class name in all caps' do
-      clinic = BaseClinic.new(storage)
-      expect(clinic.module_prefix).to eq('BASE_CLINIC')
-    end
-
-    it 'works with subclasses' do
-      clinic = TestClinic.new(storage)
-      expect(clinic.module_prefix).to eq('TEST_CLINIC')
-    end
-  end
 end

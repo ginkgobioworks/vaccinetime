@@ -146,6 +146,10 @@ module Costco
       @appointment_data = appointment_data.sort_by { |client| client[:location] }
     end
 
+    def module_name
+      'COSTCO'
+    end
+
     def title
       'Costco'
     end

@@ -164,6 +164,10 @@ module Athena
       @appointments = appointments
     end
 
+    def module_name
+      'ATHENA'
+    end
+
     def title
       "#{@location} on #{date}"
     end

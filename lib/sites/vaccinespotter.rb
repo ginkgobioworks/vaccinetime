@@ -64,6 +64,10 @@ module Vaccinespotter
       @stores = stores
     end
 
+    def module_name
+      'VACCINESPOTTER_PHARMACY'
+    end
+
     def cities
       @stores.map { |store| store['city'] }.compact.uniq.sort
     end
@@ -145,6 +149,10 @@ module Vaccinespotter
       super(storage)
       @brand = brand
       @stores = stores.sort_by { |store| store['city'] }
+    end
+
+    def module_name
+      'VACCINESPOTTER'
     end
 
     def title

@@ -140,6 +140,10 @@ module Cvs
       @state_status_url = "https://www.cvs.com/immunizations/covid-19-vaccine.vaccine-status.#{state}.json?vaccineinfo".freeze
     end
 
+    def module_name
+      'CVS'
+    end
+
     def init_session(logger)
       @user_agent = @user_agents.sample
       headers = {

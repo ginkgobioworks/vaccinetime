@@ -160,6 +160,10 @@ module Rxtouch
       @link = link
     end
 
+    def module_name
+      'RXTOUCH'
+    end
+
     def title
       @brand
     end

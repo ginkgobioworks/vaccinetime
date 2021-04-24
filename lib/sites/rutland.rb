@@ -31,6 +31,7 @@ module Rutland
         else
           logger.info "[Rutland] Scanning #{sites.length} sites"
           MaImmunizationsRegistrations.all_clinics(
+            'RUTLAND',
             MAIN_URL,
             sites.map { |clinic_num| "https://registrations.maimmunizations.org//reg/#{clinic_num[0]}" },
             storage,
@@ -53,6 +54,7 @@ module Rutland
       else
         logger.info "[Rutland] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(
+          'RUTLAND',
           TEACHER_URL,
           sites.map { |clinic_num| "https://registrations.maimmunizations.org//reg/#{clinic_num[0]}" },
           storage,

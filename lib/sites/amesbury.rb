@@ -17,6 +17,7 @@ module Amesbury
       else
         logger.info "[Amesbury] Scanning #{sites.length} sites"
         MaImmunizationsRegistrations.all_clinics(
+          'AMESBURY',
           BASE_URL,
           sites.map { |clinic_url| "https://registrations.#{clinic_url[0]}" },
           storage,

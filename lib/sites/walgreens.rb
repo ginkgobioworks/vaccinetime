@@ -161,6 +161,10 @@ module Walgreens
       @cities = cities
     end
 
+    def module_name
+      'WALGREENS'
+    end
+
     def title
       'Walgreens'
     end

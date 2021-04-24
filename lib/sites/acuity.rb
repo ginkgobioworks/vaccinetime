@@ -145,6 +145,10 @@ module Acuity
       @link = link
     end
 
+    def module_name
+      'ACUITY'
+    end
+
     def title
       "#{name} on #{date}"
     end

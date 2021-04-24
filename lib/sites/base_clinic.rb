@@ -56,20 +56,20 @@ class BaseClinic
     }
   end
 
-  def module_prefix
-    @module_prefix ||= self.class.to_s.gsub(/::.*/, '').gsub(/(.)([A-Z])/, '\1_\2').upcase
+  def module_name
+    'DEFAULT'
   end
 
   def tweet_threshold
-    ENV["#{module_prefix}_TWEET_THRESHOLD"] || self.class::DEFAULT_TWEET_THRESHOLD
+    ENV["#{module_name}_TWEET_THRESHOLD"] || self.class::DEFAULT_TWEET_THRESHOLD
   end
 
   def tweet_cooldown
-    ENV["#{module_prefix}_TWEET_COOLDOWN"] || self.class::DEFAULT_TWEET_COOLDOWN
+    ENV["#{module_name}_TWEET_COOLDOWN"] || self.class::DEFAULT_TWEET_COOLDOWN
   end
 
   def tweet_increase_needed
-    ENV["#{module_prefix}_TWEET_INCREASE_NEEDED"] || self.class::DEFAULT_TWEET_INCREASE_NEEDED
+    ENV["#{module_name}_TWEET_INCREASE_NEEDED"] || self.class::DEFAULT_TWEET_INCREASE_NEEDED
   end
 
   def has_not_posted_recently?

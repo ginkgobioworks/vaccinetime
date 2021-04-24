@@ -16,8 +16,8 @@ looks at whether the number of appointments is greater than the previously seen
 amount and only then sends a tweet. It also only tweets after all three of the
 following criteria are met:
 
-1. A minimum appointment threshold is reached - default 10
-2. A minimum increase since the last check is reached - default 5
+1. A minimum appointment threshold is reached - default 20
+2. A minimum increase since the last check is reached - default 10
 3. Hasn't tweeted about this clinic within a certain amount of time - default
    30 minutes
 

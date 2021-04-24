@@ -42,7 +42,7 @@ module Zocdoc
       sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
     },
     'pr_MFpAkwJEAEaLWrzldda5NR' => {
-      name: 'Holtzman Medical Group - Educational Staff Clinics',
+      name: 'Holtzman Medical Group- COVID19 clinic at American Legion Post 440',
       sign_up_link: 'https://www.zocdoc.com/vaccine/screener?state=MA',
     },
     'pr_iXjD9x2P-0OrLNoIknFr8R' => {

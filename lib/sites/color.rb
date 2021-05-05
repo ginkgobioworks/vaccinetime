@@ -1,6 +1,7 @@
 require 'date'
 require 'json'
 require 'rest-client'
+require 'nokogiri'
 
 require_relative '../sentry_helper'
 require_relative './base_clinic'
@@ -94,6 +95,72 @@ module Color
     end
   end
 
+  class CicCommunity
+    class CommunityPage < Page
+      attr_reader :link, :site_id, :site_name, :calendar
+
+      def initialize(storage, logger, link, site_name, site_id, calendar)
+        super(storage, logger)
+        @link = link
+        @site_name = site_name
+        @site_id = site_id
+        @calendar = calendar
+      end
+
+      def get_appointments(token, name)
+        JSON.parse(
+          RestClient.get(
+            APPOINTMENT_URL,
+            params: {
+              claim_token: token,
+              collection_site: name,
+              calendar: calendar,
+            }
+          )
+        )
+      end
+
+      def clinics
+        @logger.info "[Color] Checking site #{site_name}"
+        token_response = get_token_response
+        token = token_response['token']
+        site_info = token_response['population_settings']['collection_sites'][0]
+
+        appointments_by_date(token, site_info['name']).map do |date, appointments|
+          @logger.info "[Color] Site #{site_name} on #{date}: found #{appointments} appointments" if appointments.positive?
+          Clinic.new(@storage, site_id, site_info, date, appointments, link, site_name: site_name, module_name: 'COLOR_COMMUNITY')
+        end
+      end
+    end
+
+    def initialize(storage, logger)
+      @storage = storage
+      @logger = logger
+    end
+
+    def clinics
+      html = Nokogiri::HTML(RestClient.get('https://www.cic-health.com/popups').body)
+      html.search('select.location-select option').flat_map do |option|
+        next if option['value'] == '-1'
+
+        sleep 1
+        begin
+          site_name = option.text.strip
+          page_url = option['value']
+          page = RestClient.get(page_url).body
+          match = %r{"https://home\.color\.com/vaccine/register/([\w_-]+)\?calendar=([\d\w-]+)"}.match(page)
+          next unless match
+
+          CommunityPage.new(@storage, @logger, page_url, site_name, match[1], match[2]).clinics
+        rescue RestClient::TooManyRequests
+          @logger.warn("[Color] Too many requests for #{option['value']}")
+          sleep 1
+          nil
+        end
+      end.compact
+    end
+  end
+
   class Northampton < Page
     def site_id
       'northampton'
@@ -132,6 +199,7 @@ module Color
     Gillette,
     Hynes,
     ReggieLewis,
+    CicCommunity,
     LawrenceGeneral,
     Northampton,
     WestSpringfield,
@@ -148,23 +216,21 @@ module Color
   end
 
   class Clinic < BaseClinic
-    attr_reader :appointments, :date, :link
+    attr_reader :appointments, :date, :link, :module_name
 
-    def initialize(storage, site_id, site_info, date, appointments, link)
+    def initialize(storage, site_id, site_info, date, appointments, link, site_name: nil, module_name: 'COLOR')
       super(storage)
       @site_id = site_id
       @site_info = site_info
       @date = date
       @appointments = appointments
       @link = link
-    end
-
-    def module_name
-      'COLOR'
+      @site_name = site_name
+      @module_name = module_name
     end
 
     def name
-      @site_info['name']
+      @site_name || @site_info['name']
     end
 
     def title

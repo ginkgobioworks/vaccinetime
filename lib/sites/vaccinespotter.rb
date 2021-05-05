@@ -72,7 +72,7 @@ module Vaccinespotter
     end
 
     def module_name
-      'VACCINESPOTTER_PHARMACY'
+      @brand.gsub(' ', '_').gsub('/', '_').upcase
     end
 
     def cities
@@ -163,7 +163,7 @@ module Vaccinespotter
     end
 
     def module_name
-      'VACCINESPOTTER'
+      @brand.gsub(' ', '_').upcase
     end
 
     def title

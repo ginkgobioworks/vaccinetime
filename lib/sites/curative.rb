@@ -9,9 +9,9 @@ module Curative
   BASE_URL = 'https://curative.com/sites/'.freeze
   API_URL = 'https://labtools.curativeinc.com/api/v1/testing_sites/'.freeze
   SITES = {
-    24181 => 'DoubleTree Hotel - Danvers',
-    24182 => 'Eastfield Mall - Springfield',
-    25336 => 'Circuit City - Dartmouth',
+    28418 => 'DoubleTree Hotel - Danvers',
+    28419 => 'Eastfield Mall - Springfield',
+    28417 => 'Circuit City - Dartmouth',
   }.freeze
 
   def self.all_clinics(storage, logger)

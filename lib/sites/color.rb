@@ -64,6 +64,24 @@ module Color
     end
   end
 
+  class Gillette < Page
+    def site_id
+      'gillettestadium'
+    end
+  end
+
+  class Hynes < Page
+    def site_id
+      'fenway-hynes'
+    end
+  end
+
+  class ReggieLewis < Page
+    def site_id
+      'reggielewis'
+    end
+  end
+
   class LawrenceGeneral < Page
     def site_id
       'lawrencegeneral'
@@ -111,6 +129,9 @@ module Color
   end
 
   SITES = [
+    Gillette,
+    Hynes,
+    ReggieLewis,
     LawrenceGeneral,
     Northampton,
     WestSpringfield,

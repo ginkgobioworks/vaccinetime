@@ -117,6 +117,18 @@ configuration, use:
 * MA_IMMUNIZATIONS_TWEET_INCREASE_NEEDED
 * MA_IMMUNIZATIONS_TWEET_COOLDOWN
 
+Defaults can be set for non-pharmacy sites using:
+
+* DEFAULT_TWEET_THRESHOLD
+* DEFAULT_TWEET_INCREASE_NEEDED
+* DEFAULT_TWEET_COOLDOWN
+
+Defaults can be set for pharmacies using:
+
+* PHARMACY_DEFAULT_TWEET_THRESHOLD
+* PHARMACY_DEFAULT_TWEET_INCREASE_NEEDED
+* PHARMACY_DEFAULT_TWEET_COOLDOWN
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute. We

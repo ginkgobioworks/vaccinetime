@@ -1,9 +1,9 @@
 require 'date'
 
 class BaseClinic
-  DEFAULT_TWEET_THRESHOLD = 20 # minimum number to post
-  DEFAULT_TWEET_INCREASE_NEEDED = 10
-  DEFAULT_TWEET_COOLDOWN = 30 * 60 # 30 minutes
+  DEFAULT_TWEET_THRESHOLD = ENV['DEFAULT_TWEET_THRESHOLD']&.to_i || 20 # minimum number to post
+  DEFAULT_TWEET_INCREASE_NEEDED = ENV['DEFAULT_TWEET_INCREASE_NEEDED']&.to_i || 10
+  DEFAULT_TWEET_COOLDOWN = ENV['DEFAULT_TWEET_COOLDOWN']&.to_i || 30 * 60 # 30 minutes
 
   def initialize(storage)
     @storage = storage

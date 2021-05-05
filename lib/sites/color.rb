@@ -52,11 +52,12 @@ module Color
       @logger.info "[Color] Checking site #{site_id}"
       token_response = get_token_response
       token = token_response['token']
-      site_info = token_response['population_settings']['collection_sites'][0]
 
-      appointments_by_date(token, site_info['name']).map do |date, appointments|
-        @logger.info "[Color] Site #{site_id} on #{date}: found #{appointments} appointments" if appointments.positive?
-        Clinic.new(@storage, site_id, site_info, date, appointments, link)
+      token_response['population_settings']['collection_sites'].flat_map do |site_info|
+        appointments_by_date(token, site_info['name']).map do |date, appointments|
+          @logger.info "[Color] Site #{site_info['name']} on #{date}: found #{appointments} appointments" if appointments.positive?
+          Clinic.new(@storage, site_info, date, appointments, link)
+        end
       end
     end
 
@@ -95,6 +96,12 @@ module Color
     end
   end
 
+  class MetroNorth < Page
+    def site_id
+      'metronorth'
+    end
+  end
+
   class CicCommunity
     class CommunityPage < Page
       attr_reader :link, :site_id, :site_name, :calendar
@@ -124,11 +131,12 @@ module Color
         @logger.info "[Color] Checking site #{site_name}"
         token_response = get_token_response
         token = token_response['token']
-        site_info = token_response['population_settings']['collection_sites'][0]
 
-        appointments_by_date(token, site_info['name']).map do |date, appointments|
-          @logger.info "[Color] Site #{site_name} on #{date}: found #{appointments} appointments" if appointments.positive?
-          Clinic.new(@storage, site_id, site_info, date, appointments, link, site_name: site_name, module_name: 'COLOR_COMMUNITY')
+        token_response['population_settings']['collection_sites'].flat_map do |site_info|
+          appointments_by_date(token, site_info['name']).map do |date, appointments|
+            @logger.info "[Color] Site #{site_name} on #{date}: found #{appointments} appointments" if appointments.positive?
+            Clinic.new(@storage, site_info, date, appointments, link, site_name: site_name, module_name: 'COLOR_COMMUNITY')
+          end
         end
       end
     end
@@ -203,6 +211,7 @@ module Color
     LawrenceGeneral,
     Northampton,
     WestSpringfield,
+    MetroNorth,
   ].freeze
 
   def self.all_clinics(storage, logger)
@@ -218,9 +227,8 @@ module Color
   class Clinic < BaseClinic
     attr_reader :appointments, :date, :link, :module_name
 
-    def initialize(storage, site_id, site_info, date, appointments, link, site_name: nil, module_name: 'COLOR')
+    def initialize(storage, site_info, date, appointments, link, site_name: nil, module_name: 'COLOR')
       super(storage)
-      @site_id = site_id
       @site_info = site_info
       @date = date
       @appointments = appointments

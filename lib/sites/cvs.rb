@@ -107,7 +107,7 @@ module Cvs
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: "*#{title}*\n*Available appointments in:* #{@cities.join(', ')}\n*Link:* #{link}",
+          text: "*#{title}*\n*Available appointments in:* #{@cities.join(', ')}\n*New cities:* #{new_cities.length} new - #{new_cities.join(', ')}\n*Link:* #{link}",
         },
       }
     end

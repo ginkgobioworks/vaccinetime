@@ -91,13 +91,18 @@ runtime. To enable tweeting, provide the following:
 * TWITTER_CONSUMER_KEY
 * TWITTER_CONSUMER_SECRET
 
-This bot can also be configured to send slack notifications to a channel by
+This bot can also be configured to send Slack notifications to a channel by
 setting the following environment variables:
 
 * SLACK_API_TOKEN
 * SLACK_CHANNEL
 * SLACK_USERNAME
 * SLACK_ICON
+
+It can also send Discord notifications to a channel by setting the following
+environment variables:
+
+* DISCORD_TOKEN
 
 Additional configuration can be done with the following:
 

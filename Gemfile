@@ -6,6 +6,7 @@ gem 'rest-client'
 gem 'sentry-ruby'
 gem 'slack-ruby-client'
 gem 'twitter'
+gem 'discordrb'
 
 # browser automation
 gem 'ferrum'

@@ -5,6 +5,7 @@ require_relative 'lib/multi_logger'
 require_relative 'lib/storage'
 require_relative 'lib/slack'
 require_relative 'lib/twitter'
+require_relative './lib/discord'
 
 # Sites
 require_relative 'lib/sites/ma_immunizations'
@@ -98,6 +99,7 @@ def main(opts)
   storage = Storage.new
   slack = SlackClient.new(logger)
   twitter = TwitterClient.new(logger)
+  discord = DiscordClient.new(logger)
 
   logger.info "[Main] Update frequency is set to every #{UPDATE_FREQUENCY} seconds"
 
@@ -115,6 +117,7 @@ def main(opts)
       all_clinics(storage, logger, **opts) do |clinics|
         slack.post(clinics)
         twitter.post(clinics)
+        discord.post(clinics)
 
         clinics.each(&:save_appointments)
       end

@@ -8,7 +8,7 @@ require_relative '../sentry_helper'
 require_relative './base_clinic'
 
 module MaImmunizations
-  BASE_URL = "https://clinics.maimmunizations.org/clinic/search?q[services_name_in][]=Vaccination".freeze
+  BASE_URL = "https://clinics.maimmunizations.org/appointment/en/clinic/search?q[services_name_in][]=Vaccination".freeze
 
   def self.all_clinics(storage, logger)
     unconsolidated_clinics(storage, logger).each_with_object({}) do |clinic, h|
@@ -110,7 +110,7 @@ module MaImmunizations
     end
 
     def clinics
-      container = @doc.search('.main-container > div')[1]
+      container = @doc.search('#maincontent > div')[0]
 
       unless container
         @logger.warn "[MaImmunizations] Couldn't find main page container!"
@@ -235,7 +235,7 @@ module MaImmunizations
     end
 
     def sign_up_page
-      addr = 'https://www.maimmunizations.org/clinic/search?'
+      addr = 'https://www.maimmunizations.org/appointment/en/clinic/search?'
       addr += "q[venue_search_name_or_venue_name_i_cont]=#{name}&" if name
       URI.parse(addr)
     end

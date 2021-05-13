@@ -29,7 +29,7 @@ module Vaccinespotter
   def self.group_stores_by_date(stores)
     stores.each_with_object({}) do |store, h|
       store['appointments'].reject { |appt| appt['type']&.include?('2nd Dose Only') }.each do |appt|
-        date = Date.parse(appt['time'])
+        date = Date.parse(appt['time'] || appt['date'])
         h[date] ||= Hash.new(0)
         h[date][store['city']] += 1
       end
